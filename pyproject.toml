@@ -17,7 +17,7 @@ commitizen = "^1.22.3"
 name = "cz_conventional_commits"
 version = "0.0.1"
 tag_format = "v$version"
-version_files = ["pyproject.toml:version","version.txt","metadata-processor/__init__.py:version"]
+version_files = ["pyproject.toml:version","version.txt","mp/__init__.py:version"]
 changelog_file = "CHANGELOG.md"
 
 [build-system]
