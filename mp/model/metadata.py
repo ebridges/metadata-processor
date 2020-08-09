@@ -47,6 +47,8 @@ class Metadata:
         @meta.prop(read_only=True)
         def create_day_id(self) -> int:
             '''Id of the create day.'''
+            if self._create_date:
+                self._create_day_id = create_day_id(self._create_date)
 
         @meta.prop(read_only=True)
         def mime_type(self) -> str:
