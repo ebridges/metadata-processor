@@ -1,8 +1,7 @@
 from re import match, IGNORECASE
 from uuid import uuid4
 
-# Third part of V4 UUID's begin with `4`
-V4_UUID = '[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}'
+V4_UUID = '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[89AB][0-9A-F]{3}-[0-9A-F]{12}'
 EXT = '[a-z]{3,4}'
 IMAGE_KEY_PATTERN = f'^(?P<uid>{V4_UUID})/(?P<iid>{V4_UUID}).(?P<ext>{EXT})$'
 
