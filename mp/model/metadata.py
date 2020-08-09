@@ -157,14 +157,33 @@ class Metadata:
                 s = s + f'{k}={v}\n'
         return s
 
-
-if __name__ == '__main__':
-    args = dict()
-    args['create_date'] = datetime.now()
-    args['create_day_id'] = create_day_id(args['create_date'])
-    md = Metadata(args=args)
-    print(md.create_date)
-    print(md.create_day_id)
-    print(md.mime_type)
-    print(md.artist)
-    print(str(md))
+    def __eq__(self, other):
+        if not isinstance(other, Metadata):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+        return (
+            self.id == other.id
+            and self.owner == other.owner
+            and self.file_path == other.file_path
+            and self.file_size == other.file_size
+            and self.create_date == other.create_date
+            and self.create_day_id == other.create_day_id
+            and self.mime_type == other.mime_type
+            and self.image_width == other.image_width
+            and self.image_height == other.image_height
+            and self.camera_make == other.camera_make
+            and self.camera_model == other.camera_model
+            and self.aperture == other.aperture
+            and self.shutter_speed_numerator == other.shutter_speed_numerator
+            and self.shutter_speed_denominator == other.shutter_speed_denominator
+            and self.shutter_speed == other.shutter_speed
+            and self.focal_length == other.focal_length
+            and self.focal_length_numerator == other.focal_length_numerator
+            and self.focal_length_denominator == other.focal_length_denominator
+            and self.iso_speed == other.iso_speed
+            and self.gps_lon == other.gps_lon
+            and self.gps_lat == other.gps_lat
+            and self.gps_alt == other.gps_alt
+            and self.gps_date_time == other.gps_date_time
+            and self.artist == other.artist
+        )
