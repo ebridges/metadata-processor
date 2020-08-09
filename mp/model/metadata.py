@@ -1,6 +1,7 @@
 from uuid import uuid4
 from datetime import datetime
 
+from mp.model import *
 from mp.util.objects import properties, self_properties
 
 
@@ -119,26 +120,27 @@ class Metadata:
             '''Name of the individual who owns this image.'''
 
     _defaults = {
-        'file_size': 0,
-        'create_date': None,
-        'create_day_id': 0,
-        'mime_type': 'image/jpeg',
-        'image_width': 0,
-        'image_height': 0,
-        'camera_make': None,
-        'camera_model': None,
-        'aperture': None,
-        'shutter_speed_numerator': 0,
-        'shutter_speed_denominator': None,
-        'shutter_speed': None,
-        'focal_length_numerator': 0,
-        'focal_length_denominator': None,
-        'iso_speed': None,
-        'gps_lon': 0,
-        'gps_lat': 0,
-        'gps_alt': 0,
-        'gps_date_time': None,
-        'artist': None,
+        FILE_SIZE: 0,
+        CREATE_DATE: None,
+        CREATE_DAY_ID: 0,
+        MIME_TYPE: 'image/jpeg',
+        IMAGE_WIDTH: 0,
+        IMAGE_HEIGHT: 0,
+        CAMERA_MAKE: None,
+        CAMERA_MODEL: None,
+        APERTURE: None,
+        SHUTTER_SPEED_NUMERATOR: 0,
+        SHUTTER_SPEED_DENOMINATOR: None,
+        SHUTTER_SPEED: None,
+        FOCAL_LENGTH: 0,
+        FOCAL_LENGTH_NUMERATOR: 0,
+        FOCAL_LENGTH_DENOMINATOR: None,
+        ISO_SPEED: None,
+        GPS_LON: 0,
+        GPS_LAT: 0,
+        GPS_ALT: 0,
+        GPS_DATE_TIME: None,
+        ARTIST: None,
     }
 
     def __str__(self):
