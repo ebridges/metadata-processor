@@ -46,6 +46,10 @@ class ImageKey:
         return self._filename
 
     @property
+    def file_path(self) -> str:
+        return f'{self._owner_id}/{self._filename}'
+
+    @property
     def mime_type(self) -> str:
         mt = MIME_TYPES.get(self.extension)
         if not mt:
@@ -53,4 +57,4 @@ class ImageKey:
         return mt
 
     def __str__(self):
-        return f'{self.owner_id}/{self.filename}'
+        return self.file_path
