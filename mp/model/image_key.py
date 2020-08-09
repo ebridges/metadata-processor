@@ -6,6 +6,13 @@ EXT = '[a-z]{3,4}'
 IMAGE_KEY_PATTERN = f'^(?P<uid>{V4_UUID})/(?P<iid>{V4_UUID}).(?P<ext>{EXT})$'
 
 
+MIME_TYPES = {
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+}
+
+
 def parse(path):
     m = match(IMAGE_KEY_PATTERN, path, IGNORECASE)
     if m:
@@ -37,6 +44,13 @@ class ImageKey:
     @property
     def filename(self) -> str:
         return self._filename
+
+    @property
+    def mime_type(self) -> str:
+        mt = MIME_TYPES.get(self.extension)
+        if not mt:
+            raise ValueError(f'unsupported file extension: {self.extension}')
+        return mt
 
     def __str__(self):
         return f'{self.owner_id}/{self.filename}'
