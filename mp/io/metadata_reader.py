@@ -58,7 +58,7 @@ def extract_metadata(image_key, image_file, log_level='warn'):
 
         md[GPS_DATE_TIME] = extract_gps_datetime(exif)
 
-    return Metadata(args=metadata)
+    return Metadata(args=md)
 
 
 def extract_gps_coords(md):
@@ -82,8 +82,8 @@ def extract_focal_length(md):
     f = resolve_str(md, ['Exif.Photo.FocalLengthIn35mmFilm'])
     fl = resolve_str(md, ['Exif.Photo.FocalLength'])
     r = resolve_rational(fl)
-    if v and r:
-        return (f'{v}mm',) + r
+    if f and r:
+        return (f'{f}mm',) + r
     else:
         return (None, None, None)
 
@@ -190,7 +190,7 @@ def resolve_int(md, keys):
 
 
 def resolve_rational(v):
-    return [int(vv) for vv in v.split('/')] if v else (None, None)
+    return tuple([int(vv) for vv in v.split('/')]) if v else (None, None)
 
 
 def apex_to_aperture(v):
@@ -200,7 +200,7 @@ def apex_to_aperture(v):
 def apex_to_shutterspeed(v):
     if v:
         p = round(pow(2, -v), 4)
-        f = Fraction(p).limit_D(100)
+        f = Fraction(p).limit_denominator(100)
         r = f.as_integer_ratio()
         return r
 

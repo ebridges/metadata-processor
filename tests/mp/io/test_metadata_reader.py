@@ -7,7 +7,6 @@ from mp.io.metadata_reader import (
     extract_aperture,
     extract_createdate_exif,
     extract_dimensions,
-    extract_focal_length_as_rational,
     extract_focal_length,
     extract_gps_coords,
     extract_gps_date,
@@ -96,16 +95,12 @@ def test_extract_gps_coords():
 
 
 def test_extract_focal_length():
-    md = {'Exif.Photo.FocalLengthIn35mmFilm': '27'}
-    expected = '27mm'
+    md = {
+        'Exif.Photo.FocalLengthIn35mmFilm': '27',
+        'Exif.Photo.FocalLength': '4440/1000',
+    }
+    expected = ('27mm', 4440, 1000)
     actual = extract_focal_length(md)
-    assert expected == actual
-
-
-def test_extract_focal_length_as_rational():
-    md = {'Exif.Photo.FocalLength': '4440/1000'}
-    expected = [4440, 1000]
-    actual = extract_focal_length_as_rational(md)
     assert expected == actual
 
 
@@ -222,7 +217,7 @@ def test_rational_to_float():
 
 def test_resolve_rational():
     undertest = '222/444'
-    expected = [222, 444]
+    expected = (222, 444)
     actual = resolve_rational(undertest)
     assert expected == actual
 
