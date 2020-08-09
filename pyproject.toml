@@ -23,6 +23,10 @@ tag_format = "v$version"
 version_files = ["pyproject.toml:version","version.txt","mp/__init__.py:version"]
 changelog_file = "CHANGELOG.md"
 
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
