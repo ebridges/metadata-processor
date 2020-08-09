@@ -18,7 +18,7 @@ log_levels = {
 
 
 def extract_metadata(image_key, image_file, log_level='warn'):
-    metadata = {
+    md = {
         IMAGE_ID: image_key.image_id,
         OWNER_ID: image_key.owner_id,
         FILE_PATH: image_key.file_path,
@@ -35,32 +35,28 @@ def extract_metadata(image_key, image_file, log_level='warn'):
             cd = extract_createdate_xmp(xmp)
         if not cd:
             raise ValueError(f'unable to read create date from {image_file}')
-        metadata[CREATE_DATE] = cd
+        md[CREATE_DATE] = cd
 
-        metadata[ARTIST] = resolve_str(exif, ['Exif.Image.Artist'])
-        metadata[CAMERA_MAKE] = resolve_str(exif, ['Exif.Image.Make'])
-        metadata[CAMERA_MODEL] = resolve_str(exif, ['Exif.Image.Model'])
-        metadata[ISO_SPEED] = resolve_int(exif, ['Exif.Photo.ISOSpeedRatings'])
+        md[ARTIST] = resolve_str(exif, ['Exif.Image.Artist'])
+        md[CAMERA_MAKE] = resolve_str(exif, ['Exif.Image.Make'])
+        md[CAMERA_MODEL] = resolve_str(exif, ['Exif.Image.Model'])
+        md[ISO_SPEED] = resolve_int(exif, ['Exif.Photo.ISOSpeedRatings'])
 
-        metadata[APERTURE] = extract_aperture(exif)
+        md[APERTURE] = extract_aperture(exif)
 
         ss = extract_shutter_speed(exif)
-        (
-            metadata[SHUTTER_SPEED],
-            metadata[SHUTTER_SPEED_NUMERATOR],
-            metadata[SHUTTER_SPEED_DENOMINATOR],
-        ) = ss
+        (md[SHUTTER_SPEED], md[SHUTTER_SPEED_N], md[SHUTTER_SPEED_D]) = ss
 
-        ff = extract_focal_length_as_rational(exif)
-        metadata[FOCAL_LENGTH_NUMERATOR], metadata[FOCAL_LENGTH_DENOMINATOR] = ff
-        metadata[FOCAL_LENGTH] = extract_focal_length(exif)
+        ff = extract_focal_length(exif)
+        md[FOCAL_LENGTH], md[FOCAL_LENGTH_N], md[FOCAL_LENGTH_D] = ff
 
-        metadata[IMAGE_WIDTH], metadata[IMAGE_HEIGHT] = extract_dimensions(exif)
+        dd = extract_dimensions(exif)
+        md[IMAGE_WIDTH], md[IMAGE_HEIGHT] = dd
 
         gps = extract_gps_coords(exif)
-        metadata[GPS_LAT], metadata[GPS_LON], metadata[GPS_ALT] = gps
+        md[GPS_LAT], md[GPS_LON], md[GPS_ALT] = gps
 
-        metadata[GPS_DATE_TIME] = extract_gps_datetime(exif)
+        md[GPS_DATE_TIME] = extract_gps_datetime(exif)
 
     return Metadata(args=metadata)
 
@@ -83,14 +79,13 @@ def extract_gps_coords(md):
 
 
 def extract_focal_length(md):
-    v = resolve_str(md, ['Exif.Photo.FocalLengthIn35mmFilm'])
-    return f'{v}mm'
-
-
-def extract_focal_length_as_rational(md):
-    v = resolve_str(md, ['Exif.Photo.FocalLength'])
-    r = resolve_rational(v)
-    return r if r else (None, None)
+    f = resolve_str(md, ['Exif.Photo.FocalLengthIn35mmFilm'])
+    fl = resolve_str(md, ['Exif.Photo.FocalLength'])
+    r = resolve_rational(fl)
+    if v and r:
+        return (f'{v}mm',) + r
+    else:
+        return (None, None, None)
 
 
 def extract_shutter_speed(md):
@@ -189,17 +184,13 @@ def resolve_str(md, keys):
             return md[key]
 
 
-def rational_to_float(v, p=1):
-    return round(v[0] / v[1], p) if v else None
-
-
-def resolve_rational(v):
-    return [int(vv) for vv in v.split('/')] if v else None
-
-
 def resolve_int(md, keys):
     v = resolve_str(md, keys)
     return int(v) if v else None
+
+
+def resolve_rational(v):
+    return [int(vv) for vv in v.split('/')] if v else (None, None)
 
 
 def apex_to_aperture(v):
@@ -209,6 +200,14 @@ def apex_to_aperture(v):
 def apex_to_shutterspeed(v):
     if v:
         p = round(pow(2, -v), 4)
-        f = Fraction(p).limit_denominator(100)
+        f = Fraction(p).limit_D(100)
         r = f.as_integer_ratio()
         return r
+
+
+def rational_to_float(v, p=1):
+    if any(map(lambda x: x is None, v)):
+        return None
+    if not v[1]:
+        return 0
+    return round(v[0] / v[1], p)
