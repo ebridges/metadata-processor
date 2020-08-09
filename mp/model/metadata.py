@@ -70,9 +70,9 @@ class Metadata:
         @meta.prop(read_only=True)
         def aperture(self) -> str:
             '''
-      Actual aperture value of the lens when the image was taken, in APEX units.
-      https://photo.stackexchange.com/a/60950/1789
-      '''
+            Actual aperture value of the lens when the image was taken, converted from APEX units.
+            https://photo.stackexchange.com/a/60950/1789
+            '''
 
         @meta.prop(read_only=True)
         def shutter_speed_numerator(self) -> int:
