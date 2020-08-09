@@ -1,4 +1,5 @@
 ![metadata-processor-ci](https://github.com/ebridges/metadata-processor/workflows/metadata-processor-ci/badge.svg)
+[![codecov](https://codecov.io/gh/ebridges/metadata-processor/branch/master/graph/badge.svg)](https://codecov.io/gh/ebridges/metadata-processor)
 
 # Image Metadata Processor
 

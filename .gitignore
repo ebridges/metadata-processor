@@ -3,3 +3,6 @@ build/
 requirements.txt
 requirements-dev.txt
 __pycache__/
+.coverage
+htmlcov/
+coverage.xml
