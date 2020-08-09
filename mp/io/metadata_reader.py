@@ -201,8 +201,7 @@ def apex_to_shutterspeed(v):
     if v:
         p = round(pow(2, -v), 4)
         f = Fraction(p).limit_denominator(100)
-        r = f.as_integer_ratio()
-        return r
+        return (f.numerator, f.denominator)
 
 
 def rational_to_float(v, p=1):
