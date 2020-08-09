@@ -3,6 +3,7 @@ name = "metadata-processor"
 version = "0.0.1"
 description = "Extracts metadata from an image and stores to database."
 authors = ["Edward Q. Bridges <ebridges@roja.cc>"]
+license = "CC BY-NC-SA 4.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
