@@ -1,6 +1,6 @@
-# Image Metadata Processor
-
 ![metadata-processor-ci](https://github.com/ebridges/metadata-processor/workflows/metadata-processor-ci/badge.svg)
+
+# Image Metadata Processor
 
 ## License
 
