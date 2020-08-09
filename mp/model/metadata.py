@@ -90,6 +90,10 @@ class Metadata:
             '''Shutter speed expressed as a fractional value'''
 
         @meta.prop(read_only=True)
+        def focal_length(self) -> int:
+            '''Focal length used by camera when image created.'''
+
+        @meta.prop(read_only=True)
         def focal_length_numerator(self) -> int:
             '''Numerator of the focal length.'''
 
