@@ -27,7 +27,11 @@ def parse(path):
 class ImageKey:
     def __init__(self, path):
         (self._owner_id, self._image_id, self._extension) = parse(path)
-        self._filename = f'{self.image_id}.{self.extension}'
+
+    def __init__(self, owner_id=uuid4(), image_id=uuid4(), extension='jpg'):
+        self._owner_id = owner_id
+        self._image_id = image_id
+        self._extension = extension
 
     @property
     def owner_id(self) -> uuid4:
@@ -43,11 +47,11 @@ class ImageKey:
 
     @property
     def filename(self) -> str:
-        return self._filename
+        return f'{self.image_id}.{self.extension}'
 
     @property
     def file_path(self) -> str:
-        return f'{self._owner_id}/{self._filename}'
+        return f'{self.owner_id}/{self.filename}'
 
     @property
     def mime_type(self) -> str:
