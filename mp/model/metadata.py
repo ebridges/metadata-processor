@@ -152,7 +152,7 @@ class Metadata:
     def dict(self):
         vals = {}
         for slot in self.__slots__:
-            vals[key] = getattr(self, slot[1:])
+            vals[slot[1:]] = getattr(self, slot[1:])
         return vals
 
     def __json__(self):
