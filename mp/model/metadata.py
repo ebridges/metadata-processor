@@ -149,41 +149,33 @@ class Metadata:
         ARTIST: None,
     }
 
+    def dict(self):
+        vals = {}
+        for slot in self.__slots__:
+            vals[key] = getattr(self, slot[1:])
+        return vals
+
+    def __json__(self):
+        from json import dumps
+
+        return dumps(self.dict())
+
     def __str__(self):
+        d = self.dict()
         s = ''
-        for k in sorted(dir(self)):
-            if not k.startswith('_'):
-                v = self.__getattribute__(k)
-                s = s + f'{k}={v}\n'
+        for k in sorted(d.keys()):
+            s = s + f'{k}={d[k]}\n'
         return s
 
     def __eq__(self, other):
         if not isinstance(other, Metadata):
             # don't attempt to compare against unrelated types
             return NotImplemented
-        return (
-            self.id == other.id
-            and self.owner == other.owner
-            and self.file_path == other.file_path
-            and self.file_size == other.file_size
-            and self.create_date == other.create_date
-            and self.create_day_id == other.create_day_id
-            and self.mime_type == other.mime_type
-            and self.image_width == other.image_width
-            and self.image_height == other.image_height
-            and self.camera_make == other.camera_make
-            and self.camera_model == other.camera_model
-            and self.aperture == other.aperture
-            and self.shutter_speed_numerator == other.shutter_speed_numerator
-            and self.shutter_speed_denominator == other.shutter_speed_denominator
-            and self.shutter_speed == other.shutter_speed
-            and self.focal_length == other.focal_length
-            and self.focal_length_numerator == other.focal_length_numerator
-            and self.focal_length_denominator == other.focal_length_denominator
-            and self.iso_speed == other.iso_speed
-            and self.gps_lon == other.gps_lon
-            and self.gps_lat == other.gps_lat
-            and self.gps_alt == other.gps_alt
-            and self.gps_date_time == other.gps_date_time
-            and self.artist == other.artist
-        )
+        else:
+            for slot in self.__slots__:
+                this = getattr(self, slot[1:])
+                that = getattr(other, slot[1:])
+                if not this == that:
+                    print(f'mismatch on field {slot[1:]}')
+                    return False
+            return True
