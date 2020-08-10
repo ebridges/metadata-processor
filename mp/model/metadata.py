@@ -155,18 +155,6 @@ class Metadata:
             vals[slot[1:]] = getattr(self, slot[1:])
         return vals
 
-    def __json__(self):
-        from json import dumps
-
-        return dumps(self.dict())
-
-    def __str__(self):
-        d = self.dict()
-        s = ''
-        for k in sorted(d.keys()):
-            s = s + f'{k}={d[k]}\n'
-        return s
-
     def __eq__(self, other):
         if not isinstance(other, Metadata):
             # don't attempt to compare against unrelated types
