@@ -215,6 +215,19 @@ def test_rational_to_float():
     assert expected == actual
 
 
+def test_rational_to_float_zero_denominator():
+    undertest = (2, 0)
+    expected = 0
+    actual = rational_to_float(undertest)
+    assert expected == actual
+
+
+def test_rational_to_float_none_denominator():
+    undertest = (2, None)
+    actual = rational_to_float(undertest)
+    assert actual is None
+
+
 def test_resolve_rational():
     undertest = '222/444'
     expected = (222, 444)
