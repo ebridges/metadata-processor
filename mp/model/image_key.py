@@ -28,10 +28,10 @@ class ImageKey:
     def __init__(self, path):
         (self._owner_id, self._image_id, self._extension) = parse(path)
 
-    def __init__(self, owner_id=uuid4(), image_id=uuid4(), extension='jpg'):
-        self._owner_id = owner_id
-        self._image_id = image_id
-        self._extension = extension
+    @classmethod
+    def new(cls, owner_id=uuid4(), image_id=uuid4(), extension='jpg'):
+        path = f'{owner_id}/{image_id}.{extension}'
+        return cls(path)
 
     @property
     def owner_id(self) -> uuid4:
@@ -62,3 +62,9 @@ class ImageKey:
 
     def __str__(self):
         return self.file_path
+
+    def __eq__(self, other):
+        if not isinstance(other, ImageKey):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+        return self.file_path == other.file_path

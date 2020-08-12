@@ -20,6 +20,12 @@ class MetadataWriter(object):
         pass
 
 
+class DatabaseMetadataWriter(MetadataWriter):
+    def write(self, metadata):
+        # not yet implemented
+        pass
+
+
 class StdoutMetadataWriter(MetadataWriter):
     def write(self, metadata):
         self.output.write(self.formatter(metadata))
