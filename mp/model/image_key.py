@@ -25,11 +25,6 @@ def parse(path):
 
 
 class ImageKey:
-    def __init__(self):
-        self._owner_id = uuid4()
-        self._image_id = uuid4()
-        self._extension = 'jpg'
-
     def __init__(self, path):
         (self._owner_id, self._image_id, self._extension) = parse(path)
 

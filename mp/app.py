@@ -98,7 +98,7 @@ def mp(image_filenames, image_key, db_url, format, output, verbose):
 
     metadatas = []
     for image_filename in image_filenames:
-        image_key = ImageKey() if not image_key else image_key
+        image_key = ImageKey.new() if not image_key else image_key
         info(f'gathering metadata from {image_filename} for key {image_key}')
         metadata = extract_metadata(image_key, image_filename, verbose)
         metadatas.append(metadata)
