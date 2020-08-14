@@ -1,37 +1,34 @@
-from sys import stdout
+from mp.io.writer.connection_factory import ConnectionFactory
 
 
 class MetadataWriter(object):
+    def write(self, metadata):
+        pass
+
+
+class FilehandleMetadataWriter(MetadataWriter):
     def __init__(self, output, formatter):
         if output:
             self.output = output
             self.formatter = formatter
 
-    @staticmethod
-    def instance(t, f):
-        if t == 'stdout':
-            return StdoutMetadataWriter(stdout, f)
-        if t == 'database':
-            return DatabaseMetadataWriter(t, f)
-        else:
-            return FileMetadataWriter(t, f)
-
-    def write(self, metadata):
-        pass
-
-
-class DatabaseMetadataWriter(MetadataWriter):
-    def write(self, metadata):
-        # not yet implemented
-        pass
-
-
-class StdoutMetadataWriter(MetadataWriter):
     def write(self, metadata):
         self.output.write(self.formatter(metadata))
 
 
-class FileMetadataWriter(MetadataWriter):
+class DatabaseMetadataWriter(MetadataWriter):
+    def __init__(self, db_url):
+        self.connection_factory = ConnectionFactory.instance(db_url)
+
+    def __enter__(self):
+        self.connection = self.connection_factory.connect()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.connection.close()
+
+    def exists(self, path):
+        pass
+
     def write(self, metadata):
-        with open(self.output, 'w') as file:
-            file.write(self.formatter(metadata))
+        # not yet implemented
+        pass

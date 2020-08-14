@@ -40,6 +40,6 @@ def json_formatter(metadata):
 
 formatters = {
     'csv': csv_formatter,
-    'text': text_formatter,
+    'txt': text_formatter,
     'json': json_formatter,
 }

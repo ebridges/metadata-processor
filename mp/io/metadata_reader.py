@@ -17,7 +17,8 @@ log_levels = {
 }
 
 
-def extract_metadata(image_key, image_file, log_level='warn'):
+def extract_metadata(image_key, image_file, verbose=False):
+    log_level = 'debug' if verbose else 'warn'
     md = {
         IMAGE_ID: image_key.image_id,
         OWNER_ID: image_key.owner_id,

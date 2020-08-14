@@ -9,6 +9,7 @@ license = "CC BY-NC-SA 4.0"
 python = "^3.7"
 pyexiv2 = "^2.3.1"
 psycopg2 = "^2.8.5"
+click = "^7.1.2"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.3.0"
