@@ -12,7 +12,7 @@ from tests.mp.io.writer.mock_metadata_formatter import mock_formatter
 from tests.mp.model.mock_metadata import MockMetadata
 
 
-def test_stdout_metadatawriter(capsys):
+def test_stdout_metadatawriter():
     mock_data = {'foo': 'bar'}
     mock_metadata = MockMetadata(args=mock_data)
     expected = str(mock_data)
