@@ -1,7 +1,7 @@
 from mp.io.writer.connection_factory import ConnectionFactory
 
 
-class MetadataWriter(object):
+class MetadataWriter(object):  # pragma: no cover
     def write(self, metadata):
         pass
 

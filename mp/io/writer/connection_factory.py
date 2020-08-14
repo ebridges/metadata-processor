@@ -12,7 +12,7 @@ class ConnectionFactory:
         else:
             raise Exception(f'unsupported db type: {dbtype}')
 
-    def connect(self):
+    def connect(self):  # pragma: no cover
         pass
 
 

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 import click
 
 
-class DatabaseUrlType(click.ParamType):
+class DatabaseUrlType(click.ParamType):  # pragma: no cover
     name = 'db-url'
 
     def convert(self, value, param, ctx):
@@ -27,10 +27,7 @@ class DatabaseUrlType(click.ParamType):
             )
 
 
-# DB_URL = DatabaseUrlType()
-
-
-def configure_logging(verbose):
+def configure_logging(verbose):  # pragma: no cover
     if verbose:
         level = DEBUG
     else:

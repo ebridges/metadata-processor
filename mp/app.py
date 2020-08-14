@@ -85,7 +85,7 @@ format_types = formatters.keys()
 )
 @option('-v', '--verbose', default=False, is_flag=True, help='Show verbose logging.')
 @version_option(version=version)
-def mp(image_filenames, image_key, db_url, format, output, verbose):
+def mp(image_filenames, image_key, db_url, format, output, verbose):  # pragma: no cover
     configure_logging(verbose)
 
     info(f'mp v{version}')
@@ -110,5 +110,5 @@ def mp(image_filenames, image_key, db_url, format, output, verbose):
         writer.write(metadata)
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     mp()
