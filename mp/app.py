@@ -28,6 +28,7 @@ from mp.io.metadata_reader import extract_metadata
 from mp.io.writer.metadata_writer import (
     FilehandleMetadataWriter,
     DatabaseMetadataWriter,
+    ConnectionFactory,
 )
 from mp.model.image_key import ImageKey
 from mp.model.metadata import Metadata
@@ -90,7 +91,8 @@ def mp(image_filenames, image_key, db_url, format, output, verbose):
     info(f'mp v{version}')
     writer = None
     if db_url:
-        writer = DatabaseMetadataWriter(db_url)
+        connection_factory = ConnectionFactory.instance(db_url)
+        writer = DatabaseMetadataWriter(connection_factory)
     else:
         output_type = output if output else stdout
         formatter = formatters[format]

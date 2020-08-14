@@ -16,9 +16,9 @@ class FilehandleMetadataWriter(MetadataWriter):
         self.output.write(self.formatter(metadata))
 
 
-class DatabaseMetadataWriter(MetadataWriter):
-    def __init__(self, db_url):
-        self.connection_factory = ConnectionFactory.instance(db_url)
+class DatabaseMetadataWriter(MetadataWriter):  # pragma: no cover
+    def __init__(self, connection_factory):
+        self.connection_factory = connection_factory
 
     def __enter__(self):
         self.connection = self.connection_factory.connect()
