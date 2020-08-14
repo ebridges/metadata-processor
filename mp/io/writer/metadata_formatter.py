@@ -16,7 +16,7 @@ def csv_formatter(metadata):
         return ''
 
 
-def text_formatter(metadata):
+def txt_formatter(metadata):
     if metadata:
         d = metadata.dict()
         s = ''
@@ -40,6 +40,6 @@ def json_formatter(metadata):
 
 formatters = {
     'csv': csv_formatter,
-    'txt': text_formatter,
+    'txt': txt_formatter,
     'json': json_formatter,
 }

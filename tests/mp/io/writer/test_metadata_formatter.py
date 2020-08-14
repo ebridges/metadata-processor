@@ -5,7 +5,7 @@ from mp.model.metadata import Metadata
 from mp.io.writer import metadata_formatter
 from mp.io.writer.metadata_formatter import (
     csv_formatter,
-    text_formatter,
+    txt_formatter,
     json_formatter,
     formatters,
 )
@@ -276,7 +276,7 @@ def test_csv_formatter_two_keys_empty_vals():
 def test_text_formatter_none():
     md = None
     expected = None
-    actual = text_formatter(md)
+    actual = txt_formatter(md)
     assert expected == actual
 
 
@@ -307,7 +307,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = text_formatter(md)
+    actual = txt_formatter(md)
     assert expected == actual
 
 
@@ -338,7 +338,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = text_formatter(md)
+    actual = txt_formatter(md)
     assert expected == actual
 
 
@@ -369,7 +369,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = text_formatter(md)
+    actual = txt_formatter(md)
     assert expected == actual
 
 
@@ -400,7 +400,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = text_formatter(md)
+    actual = txt_formatter(md)
     assert expected == actual
 
 
@@ -431,7 +431,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = text_formatter(md)
+    actual = txt_formatter(md)
     assert expected == actual
 
 
