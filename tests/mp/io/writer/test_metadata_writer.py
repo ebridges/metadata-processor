@@ -6,40 +6,10 @@ from assertpy import assert_that, contents_of
 from mp.io.writer.metadata_writer import (
     MetadataWriter,
     DatabaseMetadataWriter,
-    StdoutMetadataWriter,
-    FileMetadataWriter,
+    FilehandleMetadataWriter,
 )
 from tests.mp.io.writer.mock_metadata_formatter import mock_formatter
 from tests.mp.model.mock_metadata import MockMetadata
-
-
-def test_metadatawriter_init():
-    output = 'foo'
-    formatter = mock_formatter
-    under_test = MetadataWriter(output, formatter)
-    assert output == under_test.output
-    assert formatter == under_test.formatter
-
-
-def test_metadatawriter_instantiate_unknowntype():
-    output = 'foo'
-    formatter = mock_formatter
-    under_test = MetadataWriter.instance(output, formatter)
-    assert isinstance(under_test, FileMetadataWriter)
-
-
-def test_metadatawriter_instantiate_stdouttype():
-    output = 'stdout'
-    formatter = mock_formatter
-    under_test = MetadataWriter.instance(output, formatter)
-    assert isinstance(under_test, StdoutMetadataWriter)
-
-
-def test_metadatawriter_instantiate_dbtype():
-    output = 'database'
-    formatter = mock_formatter
-    under_test = MetadataWriter.instance(output, formatter)
-    assert isinstance(under_test, DatabaseMetadataWriter)
 
 
 def test_stdout_metadatawriter(capsys):
