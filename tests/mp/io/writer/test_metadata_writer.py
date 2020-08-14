@@ -17,19 +17,25 @@ def test_stdout_metadatawriter():
     mock_metadata = MockMetadata(args=mock_data)
     expected = str(mock_data)
     with patch('sys.stdout', new=StringIO()) as mock_stdout:
-        under_test = StdoutMetadataWriter(mock_stdout, mock_formatter)
+        under_test = FilehandleMetadataWriter(mock_stdout, mock_formatter)
         under_test.write(mock_metadata)
         actual = mock_stdout.getvalue()
         assert expected == actual
+        assert mock_stdout == under_test.output
+        assert mock_formatter == under_test.formatter
 
 
 def test_file_metadatawriter():
     mock_data = {'foo': 'bar'}
     mock_metadata = MockMetadata(args=mock_data)
     expected_data = str(mock_data)
-    with NamedTemporaryFile() as expected, NamedTemporaryFile() as actual:
+    with NamedTemporaryFile() as expected, NamedTemporaryFile(
+        mode='w', encoding='utf-8'
+    ) as actual:
         expected.write(expected_data.encode())
-        under_test = FileMetadataWriter(actual.name, mock_formatter)
+        under_test = FilehandleMetadataWriter(actual.file, mock_formatter)
         under_test.write(mock_metadata)
         actual_contents = contents_of(actual.name)
         assert_that(actual_contents).contains(expected_data)
+        assert actual.file == under_test.output
+        assert mock_formatter == under_test.formatter
