@@ -14,6 +14,7 @@ class FilehandleMetadataWriter(MetadataWriter):
 
     def write(self, metadata):
         self.output.write(self.formatter(metadata))
+        self.output.flush()
 
 
 class DatabaseMetadataWriter(MetadataWriter):  # pragma: no cover
