@@ -28,8 +28,9 @@ class ConnectionFactory:
 
 class SqliteConnectionFactory(ConnectionFactory):
     def connect(self):
-        if '/' in self.dbinfo['dbname']:
-            data_path = Path(self.dbinfo['dbname']).parent
+        dbname = self.dbinfo.get('dbname')
+        if dbname and '/' in dbname:
+            data_path = Path(dbname).parent
             info(f'Creating parent folders for db file: {data_path}')
             makedirs(data_path, exist_ok=True)
 
