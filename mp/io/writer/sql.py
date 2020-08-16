@@ -14,15 +14,15 @@ _columns = [
 ]
 
 _sql_types = {
-    model.IMAGE_ID: 'uuid',
-    model.FILE_PATH: 'varchar',
-    model.MIME_TYPE: 'varchar',
-    model.OWNER_ID: 'uuid',
+    model.IMAGE_ID: 'uuid primary key',
+    model.FILE_PATH: 'varchar unique not null',
+    model.MIME_TYPE: 'varchar not null',
+    model.OWNER_ID: 'uuid not null',
     model.APERTURE: 'varchar',
     model.CAMERA_MAKE: 'varchar',
     model.CAMERA_MODEL: 'varchar',
-    model.CREATE_DATE: 'timestamp without time zone',
-    model.CREATE_DAY_ID: 'integer',
+    model.CREATE_DATE: 'timestamp without time zone not null',
+    model.CREATE_DAY_ID: 'integer not null',
     model.FILE_SIZE: 'bigint',
     model.FOCAL_LENGTH: 'varchar',
     model.FOCAL_LENGTH_N: 'integer',
