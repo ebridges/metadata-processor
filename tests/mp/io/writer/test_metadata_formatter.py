@@ -29,7 +29,7 @@ def test_json_formatter_with_conversions():
     md = Metadata(args={'id': uuid, 'create_date': now})
     expected = '''{
     "id": "%s",
-    "owner": null,
+    "owner_id": null,
     "file_path": null,
     "file_size": 0,
     "create_date": "%s",
@@ -43,7 +43,7 @@ def test_json_formatter_with_conversions():
     "shutter_speed_numerator": 0,
     "shutter_speed_denominator": null,
     "shutter_speed": null,
-    "focal_length": 0,
+    "focal_length": null,
     "focal_length_numerator": 0,
     "focal_length_denominator": null,
     "iso_speed": null,
@@ -65,7 +65,7 @@ def test_json_formatter_no_keys():
     md = Metadata(args={})
     expected = '''{
     "id": null,
-    "owner": null,
+    "owner_id": null,
     "file_path": null,
     "file_size": 0,
     "create_date": null,
@@ -79,7 +79,7 @@ def test_json_formatter_no_keys():
     "shutter_speed_numerator": 0,
     "shutter_speed_denominator": null,
     "shutter_speed": null,
-    "focal_length": 0,
+    "focal_length": null,
     "focal_length_numerator": 0,
     "focal_length_denominator": null,
     "iso_speed": null,
@@ -94,10 +94,10 @@ def test_json_formatter_no_keys():
 
 
 def test_json_formatter_one_key():
-    md = Metadata(args={'owner': 'bbb'})
+    md = Metadata(args={'owner_id': 'bbb'})
     expected = '''{
     "id": null,
-    "owner": "bbb",
+    "owner_id": "bbb",
     "file_path": null,
     "file_size": 0,
     "create_date": null,
@@ -111,7 +111,7 @@ def test_json_formatter_one_key():
     "shutter_speed_numerator": 0,
     "shutter_speed_denominator": null,
     "shutter_speed": null,
-    "focal_length": 0,
+    "focal_length": null,
     "focal_length_numerator": 0,
     "focal_length_denominator": null,
     "iso_speed": null,
@@ -126,10 +126,10 @@ def test_json_formatter_one_key():
 
 
 def test_json_formatter_two_keys():
-    md = Metadata(args={'owner': 'bbb', 'artist': 'yyy'})
+    md = Metadata(args={'owner_id': 'bbb', 'artist': 'yyy'})
     expected = '''{
     "id": null,
-    "owner": "bbb",
+    "owner_id": "bbb",
     "file_path": null,
     "file_size": 0,
     "create_date": null,
@@ -143,7 +143,7 @@ def test_json_formatter_two_keys():
     "shutter_speed_numerator": 0,
     "shutter_speed_denominator": null,
     "shutter_speed": null,
-    "focal_length": 0,
+    "focal_length": null,
     "focal_length_numerator": 0,
     "focal_length_denominator": null,
     "iso_speed": null,
@@ -158,10 +158,10 @@ def test_json_formatter_two_keys():
 
 
 def test_json_formatter_one_key_none_val():
-    md = Metadata(args={'owner': None})
+    md = Metadata(args={'owner_id': None})
     expected = '''{
     "id": null,
-    "owner": null,
+    "owner_id": null,
     "file_path": null,
     "file_size": 0,
     "create_date": null,
@@ -175,7 +175,7 @@ def test_json_formatter_one_key_none_val():
     "shutter_speed_numerator": 0,
     "shutter_speed_denominator": null,
     "shutter_speed": null,
-    "focal_length": 0,
+    "focal_length": null,
     "focal_length_numerator": 0,
     "focal_length_denominator": null,
     "iso_speed": null,
@@ -190,10 +190,10 @@ def test_json_formatter_one_key_none_val():
 
 
 def test_json_formatter_two_keys_empty_vals():
-    md = Metadata(args={'owner': '', 'artist': None})
+    md = Metadata(args={'owner_id': '', 'artist': None})
     expected = '''{
     "id": null,
-    "owner": "",
+    "owner_id": "",
     "file_path": null,
     "file_size": 0,
     "create_date": null,
@@ -207,7 +207,7 @@ def test_json_formatter_two_keys_empty_vals():
     "shutter_speed_numerator": 0,
     "shutter_speed_denominator": null,
     "shutter_speed": null,
-    "focal_length": 0,
+    "focal_length": null,
     "focal_length_numerator": 0,
     "focal_length_denominator": null,
     "iso_speed": null,
@@ -230,44 +230,44 @@ def test_csv_formatter_none():
 
 def test_csv_formatter_no_keys():
     md = Metadata(args={})
-    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
-,,,,,0,,0,0,,0,0,,0,0,,0,0,,image/jpeg,,,,0
+    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
+,,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,,,,0
 '''
     actual = csv_formatter(md)
     assert expected == actual
 
 
 def test_csv_formatter_one_key():
-    md = Metadata(args={'owner': 'bbb'})
-    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
-,,,,,0,,0,0,,0,0,,0,0,,0,0,,image/jpeg,bbb,,,0
+    md = Metadata(args={'owner_id': 'bbb'})
+    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
+,,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,bbb,,,0
 '''
     actual = csv_formatter(md)
     assert expected == actual
 
 
 def test_csv_formatter_two_keys():
-    md = Metadata(args={'owner': 'bbb', 'artist': 'yyy'})
-    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
-,yyy,,,,0,,0,0,,0,0,,0,0,,0,0,,image/jpeg,bbb,,,0
+    md = Metadata(args={'owner_id': 'bbb', 'artist': 'yyy'})
+    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
+,yyy,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,bbb,,,0
 '''
     actual = csv_formatter(md)
     assert expected == actual
 
 
 def test_csv_formatter_one_key_none_val():
-    md = Metadata(args={'owner': None})
-    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
-,,,,,0,,0,0,,0,0,,0,0,,0,0,,image/jpeg,,,,0
+    md = Metadata(args={'owner_id': None})
+    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
+,,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,,,,0
 '''
     actual = csv_formatter(md)
     assert expected == actual
 
 
 def test_csv_formatter_two_keys_empty_vals():
-    md = Metadata(args={'owner': '', 'artist': None})
-    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
-,,,,,0,,0,0,,0,0,,0,0,,0,0,,image/jpeg,,,,0
+    md = Metadata(args={'owner_id': '', 'artist': None})
+    expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
+,,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,,,,0
 '''
     actual = csv_formatter(md)
     assert expected == actual
@@ -290,7 +290,7 @@ create_date=None
 create_day_id=0
 file_path=None
 file_size=0
-focal_length=0
+focal_length=None
 focal_length_denominator=None
 focal_length_numerator=0
 gps_alt=0
@@ -302,7 +302,7 @@ image_height=0
 image_width=0
 iso_speed=None
 mime_type=image/jpeg
-owner=None
+owner_id=None
 shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
@@ -312,7 +312,7 @@ shutter_speed_numerator=0
 
 
 def test_text_formatter_one_key():
-    md = Metadata(args={'owner': 'bbb'})
+    md = Metadata(args={'owner_id': 'bbb'})
     expected = '''aperture=None
 artist=None
 camera_make=None
@@ -321,7 +321,7 @@ create_date=None
 create_day_id=0
 file_path=None
 file_size=0
-focal_length=0
+focal_length=None
 focal_length_denominator=None
 focal_length_numerator=0
 gps_alt=0
@@ -333,7 +333,7 @@ image_height=0
 image_width=0
 iso_speed=None
 mime_type=image/jpeg
-owner=bbb
+owner_id=bbb
 shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
@@ -343,7 +343,7 @@ shutter_speed_numerator=0
 
 
 def test_text_formatter_two_keys():
-    md = Metadata(args={'owner': 'bbb', 'artist': 'yyy'})
+    md = Metadata(args={'owner_id': 'bbb', 'artist': 'yyy'})
     expected = '''aperture=None
 artist=yyy
 camera_make=None
@@ -352,7 +352,7 @@ create_date=None
 create_day_id=0
 file_path=None
 file_size=0
-focal_length=0
+focal_length=None
 focal_length_denominator=None
 focal_length_numerator=0
 gps_alt=0
@@ -364,7 +364,7 @@ image_height=0
 image_width=0
 iso_speed=None
 mime_type=image/jpeg
-owner=bbb
+owner_id=bbb
 shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
@@ -374,7 +374,7 @@ shutter_speed_numerator=0
 
 
 def test_text_formatter_one_key_none_val():
-    md = Metadata(args={'owner': None})
+    md = Metadata(args={'owner_id': None})
     expected = '''aperture=None
 artist=None
 camera_make=None
@@ -383,7 +383,7 @@ create_date=None
 create_day_id=0
 file_path=None
 file_size=0
-focal_length=0
+focal_length=None
 focal_length_denominator=None
 focal_length_numerator=0
 gps_alt=0
@@ -395,7 +395,7 @@ image_height=0
 image_width=0
 iso_speed=None
 mime_type=image/jpeg
-owner=None
+owner_id=None
 shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
@@ -405,7 +405,7 @@ shutter_speed_numerator=0
 
 
 def test_text_formatter_two_keys_empty_vals():
-    md = Metadata(args={'owner': '', 'artist': None})
+    md = Metadata(args={'owner_id': '', 'artist': None})
     expected = '''aperture=None
 artist=None
 camera_make=None
@@ -414,7 +414,7 @@ create_date=None
 create_day_id=0
 file_path=None
 file_size=0
-focal_length=0
+focal_length=None
 focal_length_denominator=None
 focal_length_numerator=0
 gps_alt=0
@@ -426,7 +426,7 @@ image_height=0
 image_width=0
 iso_speed=None
 mime_type=image/jpeg
-owner=
+owner_id=
 shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0

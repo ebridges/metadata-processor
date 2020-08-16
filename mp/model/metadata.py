@@ -29,7 +29,7 @@ class Metadata:
             '''Required: Primary Key'''
 
         @meta.prop(read_only=True)
-        def owner(self) -> uuid4:
+        def owner_id(self) -> uuid4:
             '''Required: Account that owns this image'''
 
         @meta.prop(read_only=True)
@@ -90,7 +90,7 @@ class Metadata:
             '''Shutter speed expressed as a fractional value'''
 
         @meta.prop(read_only=True)
-        def focal_length(self) -> int:
+        def focal_length(self) -> str:
             '''Focal length used by camera when image created.'''
 
         @meta.prop(read_only=True)
@@ -138,7 +138,7 @@ class Metadata:
         SHUTTER_SPEED_N: 0,
         SHUTTER_SPEED_D: None,
         SHUTTER_SPEED: None,
-        FOCAL_LENGTH: 0,
+        FOCAL_LENGTH: None,
         FOCAL_LENGTH_N: 0,
         FOCAL_LENGTH_D: None,
         ISO_SPEED: None,
