@@ -15,18 +15,16 @@ class FilehandleMetadataWriter(MetadataWriter):
             self.output = output
             self.formatter = formatter
 
-    def __enter__(self):
+    def __enter__(self):  # pragma: no cover
         debug('FilehandleMetadataWriter: entering context')
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):  # pragma: no cover
         debug('FilehandleMetadataWriter: exiting context')
         self.output.flush()
         if not self.output == stdout:
             info('not closing output because it is stdout')
             self.output.close()
-        if exc_val is not None:
-            error(f'exception {exc_type} when closing file handle: {exc_val}\n{exc_tb}')
 
     def write(self, metadata):
         self.output.write(self.formatter(metadata))
