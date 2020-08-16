@@ -57,17 +57,15 @@ class DatabaseMetadataWriter(MetadataWriter):  # pragma: no cover
     def write(self, metadata):
         if self.exists(metadata.file_path):
             info(f'file_path {metadata.file_path} already exists in db, updating it.')
-            self.update(metadata)
-            return metadata.id
+            return self.update(metadata)
         else:
             info(f'inserting new file_path {metadata.file_path}.')
-            id = self.insert(metadata)
-            return id
+            return self.insert(metadata)
 
     def exists(self, path):
         debug('executing "exists"')
         r = self._exec(exists(self.type), {FILE_PATH: path})
-        return True if r and r[0] == 1 else False
+        return True if r and r == 1 else False
 
     def insert(self, metadata):
         debug('executing "insert"')
@@ -86,4 +84,4 @@ class DatabaseMetadataWriter(MetadataWriter):  # pragma: no cover
         self.cursor.execute(statement, params)
         r = self.cursor.fetchone()
         debug(f'statement exec returned: {r}')
-        return r
+        return r[0] if r and len(r) > 0 else None

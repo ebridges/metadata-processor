@@ -51,12 +51,12 @@ def insert(dbtype=POSTGRESQL):
     column_list = ', '.join(_columns)
     if dbtype == POSTGRESQL:
         value_list = ', '.join([f'%({item})s' for item in _columns])
+        return f'insert into {table_name} ({column_list}) values ({value_list}) returning id'
     elif dbtype == SQLITE:
         value_list = ', '.join([f':{item}' for item in _columns])
+        return f'insert into {table_name} ({column_list}) values ({value_list})'
     else:
         raise ValueError(f'unrecognized database type: [{dbtype}]')
-
-    return f'insert into {table_name} ({column_list}) values ({value_list})'
 
 
 def update(dbtype=POSTGRESQL):
@@ -65,25 +65,26 @@ def update(dbtype=POSTGRESQL):
     cols = [c for c in _columns if not c == model.IMAGE_ID]
     if dbtype == POSTGRESQL:
         update_pairs = ', '.join([f'{item} = %({item})s' for item in cols])
-        image_id_placeholder = f'%({model.IMAGE_ID})s'
+        id_placeholder = f'%({model.IMAGE_ID})s'
+        return f'update {table_name} set {update_pairs} where {model.IMAGE_ID} = {id_placeholder} returning id'
     elif dbtype == SQLITE:
         update_pairs = ', '.join([f'{item} = :{item}' for item in cols])
-        image_id_placeholder = f':{model.IMAGE_ID}'
+        id_placeholder = f':{model.IMAGE_ID}'
+        return f'update {table_name} set {update_pairs} where {model.IMAGE_ID} = {id_placeholder}'
     else:
         raise ValueError(f'unrecognized database type: [{dbtype}]')
-    return f'update {table_name} set {update_pairs} where {model.IMAGE_ID} = {image_id_placeholder}'
 
 
 def delete(dbtype=POSTGRESQL):
     debug(f'building delete statement for {dbtype}')
     if dbtype == POSTGRESQL:
-        image_id_placeholder = f'%({model.IMAGE_ID})s'
+        id_placeholder = f'%({model.IMAGE_ID})s'
+        return f'delete from {table_name} where {model.IMAGE_ID} = {id_placeholder} returning id'
     elif dbtype == SQLITE:
-        image_id_placeholder = f':{model.IMAGE_ID}'
+        id_placeholder = f':{model.IMAGE_ID}'
+        return f'delete from {table_name} where {model.IMAGE_ID} = {id_placeholder}'
     else:
         raise ValueError(f'unrecognized database type: [{dbtype}]')
-
-    return f'delete from {table_name} where {model.IMAGE_ID} = {image_id_placeholder}'
 
 
 def exists(dbtype=POSTGRESQL):

@@ -124,7 +124,7 @@ def test_db_metadatawriter_write_update():
     expected = uuid4()
     expected_path = '/foo/bar'
     metadata = {'id': expected, 'file_path': expected_path}
-    with MockDatabaseMetadataWriter() as under_test:
+    with MockDatabaseMetadataWriter(update_retval=expected) as under_test:
         md = MockMetadata(args=metadata)
         actual = under_test.write(md)
     assert under_test.enter_count == 1
