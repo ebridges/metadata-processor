@@ -110,30 +110,5 @@ def mp(image_filenames, image_key, db_url, format, output, verbose):  # pragma: 
         writer.write(metadata)
 
 
-@command(
-    short_help='Deletes metadata for an image identified by the given key.',
-    epilog='© 2020 Edward Bridges CC BY-NC-SA 4.0',
-)
-@option(
-    '-d',
-    '--db-url',
-    required=True,
-    type=DatabaseUrlType(),
-    envvar=connection_url_envvar,
-    help='Connect information for database to write metadata. Example: driver://user:pass@host/database',
-)
-@argument(
-    'image-key', required=True,
-)
-@option('-v', '--verbose', default=False, is_flag=True, help='Show verbose logging.')
-def mp_del(image_key, db_url, verbose):  # pragma: no cover
-    configure_logging(verbose)
-
-    info(f'mp del v{version}')
-    connection_factory = ConnectionFactory.instance(db_url)
-    with DatabaseMetadataWriter(connection_factory) as writer:
-        writer.delete(image_key)
-
-
 if __name__ == '__main__':  # pragma: no cover
     mp()
