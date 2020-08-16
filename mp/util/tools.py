@@ -6,7 +6,7 @@ import click
 from mp.model.image_key import ImageKey
 
 
-class ImageKeyType(click.ParamType):
+class ImageKeyType(click.ParamType):  # pragma: no cover
     name = 'image-key'
 
     def convert(self, value, param, ctx):
@@ -17,19 +17,20 @@ class ImageKeyType(click.ParamType):
             self.fail(f'ImageKey in unexpected format: {value} ({str(e)})', param, ctx)
 
 
-class DatabaseUrlType(click.ParamType):  # pragma: no cover
+class DatabaseUrlType(click.ParamType):
     name = 'db-url'
 
     def convert(self, value, param, ctx):
         try:
             debug(f'parsing database url: {value}')
             u = urlparse(value)
+            path = u.path if not u.path.startswith('/') else u.path[1:]
             return {
                 'url': value,
                 'dbtype': u.scheme,
                 'hostname': u.hostname,
                 'port': u.port,
-                'dbname': u.path[1:],
+                'dbname': path,
                 'username': u.username,
                 'password': u.password,
             }
