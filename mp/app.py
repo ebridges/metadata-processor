@@ -33,7 +33,7 @@ from mp.io.writer.metadata_writer import (
 from mp.model.image_key import ImageKey
 from mp.model.metadata import Metadata
 from mp.io.writer.metadata_formatter import formatters
-from mp.util.tools import DatabaseUrlType, configure_logging
+from mp.util.tools import ImageKeyType, DatabaseUrlType, configure_logging
 
 
 connection_url_envvar = 'MP_DB_URL'
@@ -56,6 +56,7 @@ format_types = formatters.keys()
     required=False,
     default=ImageKey.new(),
     show_default=True,
+    type=ImageKeyType(),
     help='Key used for this image in remote storage, ignored if multiple filenames are passed.',
 )
 @option(

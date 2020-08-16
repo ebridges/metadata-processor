@@ -1,7 +1,20 @@
-from logging import getLogger, basicConfig, DEBUG, INFO
+from logging import getLogger, basicConfig, DEBUG, INFO, debug
 from urllib.parse import urlparse
 
 import click
+
+from mp.model.image_key import ImageKey
+
+
+class ImageKeyType(click.ParamType):
+    name = 'image-key'
+
+    def convert(self, value, param, ctx):
+        try:
+            debug(f'parsing image key: {value}')
+            return ImageKey(value)
+        except ValueError as e:
+            self.fail(f'ImageKey in unexpected format: {value} ({str(e)})', param, ctx)
 
 
 class DatabaseUrlType(click.ParamType):  # pragma: no cover
@@ -9,6 +22,7 @@ class DatabaseUrlType(click.ParamType):  # pragma: no cover
 
     def convert(self, value, param, ctx):
         try:
+            debug(f'parsing database url: {value}')
             u = urlparse(value)
             return {
                 'url': value,
