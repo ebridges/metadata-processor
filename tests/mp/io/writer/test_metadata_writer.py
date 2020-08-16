@@ -1,14 +1,17 @@
 from io import StringIO
 from tempfile import NamedTemporaryFile
+from uuid import uuid4
+
+from pytest import raises
 from unittest.mock import patch
 from assertpy import assert_that, contents_of
-from uuid import uuid4
 
 from mp.io.writer.metadata_writer import (
     MetadataWriter,
     DatabaseMetadataWriter,
     FilehandleMetadataWriter,
 )
+from mp.io.writer.sql import POSTGRESQL, SQLITE
 from tests.mp.io.writer.mock_metadata_formatter import mock_formatter
 from tests.mp.model.mock_metadata import MockMetadata
 from tests.mp.io.writer.mock_metadata_writer import MockDatabaseMetadataWriter
@@ -42,9 +45,22 @@ def test_file_metadatawriter():
         assert mock_formatter == under_test.formatter
 
 
-def test_db_metadatawriter_init():
-    under_test = DatabaseMetadataWriter({})
+def test_db_metadatawriter_init_sqlite():
+    connection_factory = MockConnectionFactory.instance(
+        db={'dbtype': SQLITE, 'url': 'foobar'}
+    )
+    under_test = DatabaseMetadataWriter(connection_factory)
     assert under_test.connection_factory is not None
+    assert under_test.type == SQLITE
+
+
+def test_db_metadatawriter_init_random():
+    connection_factory = MockConnectionFactory.instance(
+        db={'dbtype': 'junk', 'url': 'foobar'}
+    )
+    under_test = DatabaseMetadataWriter(connection_factory)
+    assert under_test.connection_factory is not None
+    assert under_test.type == 'junk'
 
 
 def test_db_metadatawriter_write():
@@ -63,12 +79,45 @@ def test_db_metadatawriter_write():
         with DatabaseMetadataWriter(connection_factory) as under_test:
             assert under_test is not None
             md = MockMetadata(args=metadata)
-            actual = under_test.write(md)
             mock_connection = under_test.connection
+            actual = under_test.write(md)
     assert mock_connection is not None
+    assert mock_connection.mock_cursor is not None
     assert connection_factory.connect_count == 1
+    assert mock_connection.cursor_count == 1
     assert mock_connection.close_count == 1
+    assert mock_connection.mock_cursor.close_count == 1
+    assert mock_connection.commit_count == 1
+    assert mock_connection.rollback_count == 0
     assert expected == actual
+
+
+def test_db_metadatawriter_write_fail():
+    metadata = {'id': uuid4()}
+    connection_factory = MockConnectionFactory.instance(
+        db={'dbtype': 'junk', 'url': 'foobar'}
+    )
+
+    def mock_write(self, metadata):
+        assert metadata is not None
+        assert metadata.id is not None
+        raise Exception('error')
+
+    with patch.object(DatabaseMetadataWriter, 'write', new=mock_write):
+        with raises(Exception):
+            with DatabaseMetadataWriter(connection_factory) as under_test:
+                assert under_test is not None
+                md = MockMetadata(args=metadata)
+                mock_connection = under_test.connection
+                under_test.write(md)
+    assert mock_connection is not None
+    assert mock_connection.mock_cursor is not None
+    assert connection_factory.connect_count == 1
+    assert mock_connection.cursor_count == 1
+    assert mock_connection.close_count == 1
+    assert mock_connection.mock_cursor.close_count == 1
+    assert mock_connection.commit_count == 0
+    assert mock_connection.rollback_count == 1
 
 
 def test_db_metadatawriter_write_update():
