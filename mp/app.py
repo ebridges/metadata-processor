@@ -2,14 +2,14 @@
 Usage: mp [OPTIONS] [IMAGE_FILENAMES]...
 
 Options:
-  -i, --image-key TEXT         Key used for this image in remote storage,
+  -i, --image-key IMAGE-KEY    Key used for this image in remote storage,
                                ignored if multiple filenames are passed.
-                               [default: d8cc87e9-4ebc-4a03-a2cd-5fff53f49469/
-                               ac4a6a09-c8bd-40a2-b99f-ed0b8a9db500.jpg]
+                               [default:(uuid4)/(uuid4).jpg]
 
   -d, --db-url DB-URL          Connect information for database to write
                                metadata. Example:
-                               driver://user:pass@host/database
+                               postgresql://user:pass@host:port/database
+                               sqlite:path/to/dbfile
 
   -f, --format [csv|txt|json]  Format of metadata when written to file or to
                                stdout.  [default: txt]
@@ -18,6 +18,8 @@ Options:
   -v, --verbose                Show verbose logging.
   --version                    Show the version and exit.
   --help                       Show this message and exit.
+
+  © 2020 Edward Bridges CC BY-NC-SA 4.0
 '''
 from logging import info, debug
 from sys import stdout
@@ -65,7 +67,7 @@ format_types = formatters.keys()
     required=False,
     type=DatabaseUrlType(),
     envvar=connection_url_envvar,
-    help='Connect information for database to write metadata. Example: driver://user:pass@host/database',
+    help='Connect information for database to write metadata. Example: postgresql://user:pass@host:port/database sqlite:path/to/dbfile',
 )
 @option(
     '-f',
