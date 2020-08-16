@@ -2,6 +2,7 @@ from logging import info, debug
 from os import makedirs
 from pathlib import Path
 
+import psycopg2
 import sqlite3
 
 from mp.io.writer.sql import create, POSTGRESQL, SQLITE
@@ -44,7 +45,14 @@ class SqliteConnectionFactory(ConnectionFactory):
 
 class PostgresqlConnectionFactory(ConnectionFactory):
     def connect(self):
-        pass
+        self.connection = psycopg2.connect(
+            host=self.dbinfo.get('hostname'),
+            port=self.dbinfo.get('port'),
+            user=self.dbinfo.get('username'),
+            password=self.dbinfo.get('password'),
+            database=self.dbinfo.get('dbname'),
+        )
+        return self.connection
 
 
 SUPPORTED_DBS = {
