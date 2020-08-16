@@ -2,6 +2,8 @@ from logging import info, debug, error
 from sys import stdout
 
 from mp.io.writer.connection_factory import ConnectionFactory
+from mp.io.writer.sql import insert, exists, update, delete
+from mp.model import FILE_PATH, IMAGE_ID
 
 
 class MetadataWriter(object):  # pragma: no cover
@@ -23,7 +25,6 @@ class FilehandleMetadataWriter(MetadataWriter):
         debug('FilehandleMetadataWriter: exiting context')
         self.output.flush()
         if not self.output == stdout:
-            info('not closing output because it is stdout')
             self.output.close()
 
     def write(self, metadata):
@@ -34,16 +35,24 @@ class FilehandleMetadataWriter(MetadataWriter):
 class DatabaseMetadataWriter(MetadataWriter):  # pragma: no cover
     def __init__(self, connection_factory):
         self.connection_factory = connection_factory
+        self.type = self.connection_factory.dbinfo['dbtype']
 
     def __enter__(self):
         cf = self.connection_factory
         self.connection = cf.connect()
+        self.cursor = self.connection.cursor()
+        debug('Database cursor connected.')
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.connection.close()
+        self.cursor.close()
         if exc_val is not None:
-            error(f'exception {exc_type} when closing db handle: {exc_val}\n{exc_tb}')
+            error(f'exception {exc_type} when closing db handle: {exc_val}')
+            self.connection.rollback()
+        else:
+            self.connection.commit()
+        self.connection.close()
+        debug('Database connection closed.')
 
     def write(self, metadata):
         if self.exists(metadata.file_path):
@@ -56,13 +65,25 @@ class DatabaseMetadataWriter(MetadataWriter):  # pragma: no cover
             return id
 
     def exists(self, path):
-        pass
+        debug('executing "exists"')
+        r = self._exec(exists(self.type), {FILE_PATH: path})
+        return True if r and r[0] == 1 else False
 
     def insert(self, metadata):
-        pass
+        debug('executing "insert"')
+        return self._exec(insert(self.type), metadata.dict())
 
     def update(self, metadata):
-        pass
+        debug('executing "update"')
+        return self._exec(update(self.type), metadata.dict())
 
     def delete(self, image_key):
-        pass
+        debug('executing "delete"')
+        return self._exec(delete(self.type), {IMAGE_ID: image_key.image_id()})
+
+    def _exec(self, statement, params):
+        debug(f'executing [{statement}] with [{params}]')
+        self.cursor.execute(statement, params)
+        r = self.cursor.fetchone()
+        debug(f'statement exec returned: {r}')
+        return r
