@@ -19,7 +19,7 @@ Options:
   --version                    Show the version and exit.
   --help                       Show this message and exit.
 '''
-from logging import info
+from logging import info, debug
 from sys import stdout
 from click import command, argument, option, version_option, Choice, File, Path
 
@@ -101,13 +101,16 @@ def mp(image_filenames, image_key, db_url, format, output, verbose):  # pragma: 
     metadatas = []
     for image_filename in image_filenames:
         image_key = ImageKey.new() if not image_key else image_key
-        info(f'gathering metadata from {image_filename} for key {image_key}')
+        debug(f'gathering metadata from {image_filename} for key {image_key}')
         metadata = extract_metadata(image_key, image_filename, verbose)
         metadatas.append(metadata)
 
     for metadata in metadatas:
-        info(f'writing metadata {metadata.file_path} [{metadata.create_day_id}]')
-        writer.write(metadata)
+        debug(f'writing metadata {metadata.file_path} [{metadata.create_day_id}]')
+        with writer:
+            result = writer.write(metadata)
+        if result:
+            info(f'result: {result}')
 
 
 if __name__ == '__main__':  # pragma: no cover
