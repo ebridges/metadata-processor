@@ -27,15 +27,15 @@ def test_parse_sqlite_url(input, expected):
 
 postgres_testdata = [
     (
-        'postgresql://postgres:postgres@localhost:5432/postgres',
+        'postgresql://postgresql:postgresql@localhost:5432/postgresql',
         {
-            'url': 'postgresql://postgres:postgres@localhost:5432/postgres',
+            'url': 'postgresql://postgresql:postgresql@localhost:5432/postgresql',
             'dbtype': 'postgresql',
-            'username': 'postgres',
-            'password': 'postgres',
+            'username': 'postgresql',
+            'password': 'postgresql',
             'hostname': 'localhost',
             'port': 5432,
-            'dbname': 'postgres',
+            'dbname': 'postgresql',
         },
     ),
     (

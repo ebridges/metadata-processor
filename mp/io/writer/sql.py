@@ -2,6 +2,9 @@ from logging import info, debug
 from mp import model
 from types import ModuleType
 
+POSTGRESQL = 'postgresql'
+SQLITE = 'sqlite'
+
 table_name = 'media_item'
 
 _columns = [
@@ -43,12 +46,12 @@ def create():
     return f'create table if not exists {table_name} ({column_decls})'
 
 
-def insert(dbtype='postgres'):
+def insert(dbtype=POSTGRESQL):
     debug(f'building insert statement for {dbtype}')
     column_list = ', '.join(_columns)
-    if dbtype == 'postgres':
+    if dbtype == POSTGRESQL:
         value_list = ', '.join([f'%({item})s' for item in _columns])
-    elif dbtype == 'sqlite':
+    elif dbtype == SQLITE:
         value_list = ', '.join([f':{item}' for item in _columns])
     else:
         raise ValueError(f'unrecognized database type: [{dbtype}]')
@@ -56,14 +59,14 @@ def insert(dbtype='postgres'):
     return f'insert into {table_name} ({column_list}) values ({value_list})'
 
 
-def update(dbtype='postgres'):
+def update(dbtype=POSTGRESQL):
     debug(f'building update statement for {dbtype}')
-    placeholder = '%s' if dbtype == 'postgres' else '?'
+    placeholder = '%s' if dbtype == POSTGRESQL else '?'
     cols = [c for c in _columns if not c == model.IMAGE_ID]
-    if dbtype == 'postgres':
+    if dbtype == POSTGRESQL:
         update_pairs = ', '.join([f'{item} = %({item})s' for item in cols])
         image_id_placeholder = f'%({model.IMAGE_ID})s'
-    elif dbtype == 'sqlite':
+    elif dbtype == SQLITE:
         update_pairs = ', '.join([f'{item} = :{item}' for item in cols])
         image_id_placeholder = f':{model.IMAGE_ID}'
     else:
@@ -71,11 +74,11 @@ def update(dbtype='postgres'):
     return f'update {table_name} set {update_pairs} where {model.IMAGE_ID} = {image_id_placeholder}'
 
 
-def delete(dbtype='postgres'):
+def delete(dbtype=POSTGRESQL):
     debug(f'building delete statement for {dbtype}')
-    if dbtype == 'postgres':
+    if dbtype == POSTGRESQL:
         image_id_placeholder = f'%({model.IMAGE_ID})s'
-    elif dbtype == 'sqlite':
+    elif dbtype == SQLITE:
         image_id_placeholder = f':{model.IMAGE_ID}'
     else:
         raise ValueError(f'unrecognized database type: [{dbtype}]')
@@ -83,11 +86,11 @@ def delete(dbtype='postgres'):
     return f'delete from {table_name} where {model.IMAGE_ID} = {image_id_placeholder}'
 
 
-def exists(dbtype='postgres'):
+def exists(dbtype=POSTGRESQL):
     debug(f'building exists statement for {dbtype}')
-    if dbtype == 'postgres':
+    if dbtype == POSTGRESQL:
         path_placeholder = f'%({model.FILE_PATH})s'
-    elif dbtype == 'sqlite':
+    elif dbtype == SQLITE:
         path_placeholder = f':{model.FILE_PATH}'
     else:
         raise ValueError(f'unrecognized database type: [{dbtype}]')

@@ -4,10 +4,11 @@ from mp.io.writer.connection_factory import (
     SqliteConnectionFactory,
     PostgresqlConnectionFactory,
 )
+from mp.io.writer.sql import POSTGRESQL, SQLITE
 
 
 def test_instanceof_sqlite():
-    db = {'dbtype': 'sqlite', 'url': 'foobar'}
+    db = {'dbtype': SQLITE, 'url': 'foobar', 'dbname': 'junkdb'}
     under_test = ConnectionFactory.instance(db)
     assert isinstance(under_test, SqliteConnectionFactory)
     assert under_test.dbinfo == db
@@ -15,7 +16,7 @@ def test_instanceof_sqlite():
 
 
 def test_instanceof_postgres():
-    db = {'dbtype': 'postgres', 'url': 'foobar'}
+    db = {'dbtype': POSTGRESQL, 'url': f'{POSTGRESQL}:postgres', 'dbname': 'postgres'}
     under_test = ConnectionFactory.instance(db)
     assert isinstance(under_test, PostgresqlConnectionFactory)
     assert under_test.dbinfo == db

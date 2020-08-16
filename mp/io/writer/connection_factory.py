@@ -4,7 +4,7 @@ from pathlib import Path
 
 import sqlite3
 
-from mp.io.writer.sql import create
+from mp.io.writer.sql import create, POSTGRESQL, SQLITE
 
 
 class ConnectionFactory:
@@ -14,13 +14,12 @@ class ConnectionFactory:
     @staticmethod
     def instance(db):
         dbtype = db['dbtype']
-        info(f'Creating instance of {dbtype} connection factory.')
-        if dbtype == 'sqlite':
-            return SqliteConnectionFactory(db)
-        if dbtype == 'postgres':
-            return PostgresqlConnectionFactory(db)
-        else:
+        if dbtype not in SUPPORTED_DBS:
             raise Exception(f'unsupported db type: {dbtype}')
+
+        info(f'Creating instance of {dbtype} connection factory.')
+        factory = SUPPORTED_DBS[dbtype]
+        return factory(db)
 
     def connect(self):  # pragma: no cover
         pass
@@ -46,3 +45,9 @@ class SqliteConnectionFactory(ConnectionFactory):
 class PostgresqlConnectionFactory(ConnectionFactory):
     def connect(self):
         pass
+
+
+SUPPORTED_DBS = {
+    POSTGRESQL: PostgresqlConnectionFactory,
+    SQLITE: SqliteConnectionFactory,
+}
