@@ -1,55 +1,95 @@
+from logging import info, debug
 from mp import model
-from mp.model import *
-
-__sql_types = {
-    IMAGE_ID: 'uuid',
-    FILE_PATH: 'varchar',
-    MIME_TYPE: 'varchar',
-    OWNER_ID: 'uuid',
-    APERTURE: 'varchar',
-    CAMERA_MAKE: 'varchar',
-    CAMERA_MODEL: 'varchar',
-    CREATE_DATE: 'timestamp without time zone',
-    CREATE_DAY_ID: 'integer',
-    FILE_SIZE: 'bigint',
-    FOCAL_LENGTH: 'varchar',
-    FOCAL_LENGTH_N: 'integer',
-    FOCAL_LENGTH_D: 'integer',
-    GPS_ALT: 'double precision',
-    GPS_DATE_TIME: 'timestamp with time zone',
-    GPS_LAT: 'double precision',
-    GPS_LON: 'double precision',
-    ARTIST: 'varchar',
-    SHUTTER_SPEED: 'varchar',
-    IMAGE_HEIGHT: 'integer',
-    IMAGE_WIDTH: 'integer',
-    ISO_SPEED: 'integer',
-    SHUTTER_SPEED_D: 'integer',
-    SHUTTER_SPEED_N: 'integer',
-}
+from types import ModuleType
 
 table_name = 'media_item'
 
 _columns = [
-    getattr(model, item) for item in sorted(dir(model)) if not item.startswith('__')
+    getattr(model, item)
+    for item in sorted(dir(model))
+    if not item.startswith('__') and not isinstance(getattr(model, item), ModuleType)
 ]
-_values = [f'%({item})s' for item in _columns]
 
-column_list = ', '.join(_columns)
-value_list = ', '.join(_values)
-insert = f'insert into {table_name} ({column_list}) values ({value_list})'
+_sql_types = {
+    model.IMAGE_ID: 'uuid',
+    model.FILE_PATH: 'varchar',
+    model.MIME_TYPE: 'varchar',
+    model.OWNER_ID: 'uuid',
+    model.APERTURE: 'varchar',
+    model.CAMERA_MAKE: 'varchar',
+    model.CAMERA_MODEL: 'varchar',
+    model.CREATE_DATE: 'timestamp without time zone',
+    model.CREATE_DAY_ID: 'integer',
+    model.FILE_SIZE: 'bigint',
+    model.FOCAL_LENGTH: 'varchar',
+    model.FOCAL_LENGTH_N: 'integer',
+    model.FOCAL_LENGTH_D: 'integer',
+    model.GPS_ALT: 'double precision',
+    model.GPS_DATE_TIME: 'timestamp with time zone',
+    model.GPS_LAT: 'double precision',
+    model.GPS_LON: 'double precision',
+    model.ARTIST: 'varchar',
+    model.SHUTTER_SPEED: 'varchar',
+    model.IMAGE_HEIGHT: 'integer',
+    model.IMAGE_WIDTH: 'integer',
+    model.ISO_SPEED: 'integer',
+    model.SHUTTER_SPEED_D: 'integer',
+    model.SHUTTER_SPEED_N: 'integer',
+}
 
-update_pairs = ', '.join(
-    [
-        f'{pair[0]} = {pair[1]}'
-        for pair in zip(
-            [c for c in _columns if not c == IMAGE_ID],
-            [v for v in _values if not v == '%({IMAGE_ID})s'],
-        )
-    ]
-)
-update = f'update {table_name} set {update_pairs} where {IMAGE_ID} = %({IMAGE_ID})s'
 
-delete = f'delete from {table_name} where {FILE_PATH} = %({FILE_PATH})s'
+def create():
+    column_decls = ', '.join([f'{k} {v}' for k, v in _sql_types.items()])
+    return f'create table if not exists {table_name} ({column_decls})'
 
-exists = f'select 1 from {table_name} where {FILE_PATH} = %({FILE_PATH})s'
+
+def insert(dbtype='postgres'):
+    debug(f'building insert statement for {dbtype}')
+    column_list = ', '.join(_columns)
+    if dbtype == 'postgres':
+        value_list = ', '.join([f'%({item})s' for item in _columns])
+    elif dbtype == 'sqlite':
+        value_list = ', '.join([f':{item}' for item in _columns])
+    else:
+        raise ValueError(f'unrecognized database type: [{dbtype}]')
+
+    return f'insert into {table_name} ({column_list}) values ({value_list})'
+
+
+def update(dbtype='postgres'):
+    debug(f'building update statement for {dbtype}')
+    placeholder = '%s' if dbtype == 'postgres' else '?'
+    cols = [c for c in _columns if not c == model.IMAGE_ID]
+    if dbtype == 'postgres':
+        update_pairs = ', '.join([f'{item} = %({item})s' for item in cols])
+        image_id_placeholder = f'%({model.IMAGE_ID})s'
+    elif dbtype == 'sqlite':
+        update_pairs = ', '.join([f'{item} = :{item}' for item in cols])
+        image_id_placeholder = f':{model.IMAGE_ID}'
+    else:
+        raise ValueError(f'unrecognized database type: [{dbtype}]')
+    return f'update {table_name} set {update_pairs} where {model.IMAGE_ID} = {image_id_placeholder}'
+
+
+def delete(dbtype='postgres'):
+    debug(f'building delete statement for {dbtype}')
+    if dbtype == 'postgres':
+        image_id_placeholder = f'%({model.IMAGE_ID})s'
+    elif dbtype == 'sqlite':
+        image_id_placeholder = f':{model.IMAGE_ID}'
+    else:
+        raise ValueError(f'unrecognized database type: [{dbtype}]')
+
+    return f'delete from {table_name} where {model.IMAGE_ID} = {image_id_placeholder}'
+
+
+def exists(dbtype='postgres'):
+    debug(f'building exists statement for {dbtype}')
+    if dbtype == 'postgres':
+        path_placeholder = f'%({model.FILE_PATH})s'
+    elif dbtype == 'sqlite':
+        path_placeholder = f':{model.FILE_PATH}'
+    else:
+        raise ValueError(f'unrecognized database type: [{dbtype}]')
+
+    return f'select 1 from {table_name} where {model.FILE_PATH} = {path_placeholder}'
