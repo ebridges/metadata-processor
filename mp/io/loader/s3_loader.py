@@ -1,8 +1,10 @@
 from logging import info
-from boto3 import resource
+from os import environ
+
+import boto3
 from botocore.exceptions import ClientError
 
-from md import (
+from mp import (
     SOURCE_BUCKET,
     DEFAULT_REGION,
 )
@@ -17,7 +19,7 @@ def download_file_from_s3(key, dest, region=DEFAULT_REGION):
     bucket = environ(SOURCE_BUCKET)
 
     info(f'downloading s3://{bucket}:{key} to {dest}')
-    s3 = resource('s3', region_name=region)
+    s3 = boto3.resource('s3', region_name=region)
 
     try:
         s3_obj = s3.Object(bucket, key)
