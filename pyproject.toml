@@ -32,6 +32,9 @@ changelog_file = "CHANGELOG.md"
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = ["tests"]
+# Using `--cov` causes breakpoints to be skipped when debugging.
+# Workaround is to add `--no-cov` to `python.testing.pytestArgs` in workspace settings.
+# https://github.com/kondratyev-nv/vscode-python-test-adapter/issues/123
 addopts = ["--cov=./","--cov-report=xml","--cov-config=.coveragerc"]
 
 [build-system]
