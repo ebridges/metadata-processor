@@ -37,7 +37,7 @@ jobs:
 
     - name: Run Tests
       run: |
-        python -m pytest --cov=./ --cov-report=xml
+        python -m pytest --cov=./ --cov-report=xml --cov-config=.coveragerc
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
