@@ -1,8 +1,10 @@
+from os import environ
 from logging import getLogger, basicConfig, DEBUG, INFO, debug
 from urllib.parse import urlparse
 
 import click
 
+from mp import VERBOSE_LOGGING
 from mp.model.image_key import ImageKey
 
 
@@ -42,8 +44,10 @@ class DatabaseUrlType(click.ParamType):
             )
 
 
-def configure_logging(verbose):  # pragma: no cover
-    if verbose:
+def configure_logging(verbose=False):  # pragma: no cover
+    if environ.get(VERBOSE_LOGGING):
+        level = DEBUG
+    elif verbose:
         level = DEBUG
     else:
         level = INFO
