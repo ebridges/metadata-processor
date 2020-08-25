@@ -1,5 +1,6 @@
 import logging
 from os import environ
+
 import sentry_sdk
 
 from mp import version, TRIGGER_ERROR
