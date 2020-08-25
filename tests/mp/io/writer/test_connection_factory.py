@@ -9,7 +9,7 @@ from mp.io.writer.sql import POSTGRESQL, SQLITE
 
 
 def test_instanceof_sqlite():
-    db = {'dbtype': SQLITE, 'url': 'foobar', 'dbname': 'junkdb'}
+    db = {'dbtype': SQLITE, 'url': 'foobar', 'dbname': 'test-db'}
     under_test = ConnectionFactory.instance(db)
     assert isinstance(under_test, SqliteConnectionFactory)
     assert under_test.dbinfo == db
