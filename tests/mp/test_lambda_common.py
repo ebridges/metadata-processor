@@ -92,10 +92,12 @@ def test_zero_records_s3_event():
 
 
 def test_empty_s3_event():
-    with raises(KeyError):
-        extract_image_keys_from_s3_event({})
+    result = extract_image_keys_from_s3_event({})
+    assert result is not None
+    assert len(result) == 0
 
 
 def test_none_s3_event():
-    with raises(TypeError):
-        extract_image_keys_from_s3_event(None)
+    result = extract_image_keys_from_s3_event(None)
+    assert result is not None
+    assert len(result) == 0

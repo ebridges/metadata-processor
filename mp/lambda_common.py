@@ -35,9 +35,10 @@ def extract_image_key_from_apig_event(event: object) -> ImageKey:
 
 def extract_image_keys_from_s3_event(event: object) -> [ImageKey]:
     keys = []
-    for record in event.get('Records', []):
-        key = record.get('s3', {}).get('object', {}).get('key')
-        keys.append(ImageKey(path=key)) if key else None
+    if event:
+        for record in event.get('Records', []):
+            key = record.get('s3', {}).get('object', {}).get('key')
+            keys.append(ImageKey(path=key)) if key else None
     return keys
 
 
