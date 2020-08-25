@@ -3,7 +3,7 @@ from logging import debug, info, warning
 from os import environ
 from tempfile import NamedTemporaryFile
 
-from sentry_sdk import init
+import sentry_sdk
 from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
 
 from mp import (
@@ -26,7 +26,10 @@ def extract_image_key_from_apig_event(event: object) -> ImageKey:
     if not event:
         return None
     path = event.get('path')
-    return ImageKey(path=path[1:]) if path else None
+    try:
+        return ImageKey(path=path[1:]) if path else None
+    except ValueError:
+        return None
 
 
 def extract_image_keys_from_s3_event(event: object) -> [ImageKey]:
@@ -53,7 +56,7 @@ def init_monitoring() -> None:  # pragma: no cover
         warning(f'DSN not found in envronment under key {MONITORING_DSN}')
         return
 
-    init(
+    sentry_sdk.init(
         dsn=dsn,
         integrations=[AwsLambdaIntegration()],
         release=f'v{version}',

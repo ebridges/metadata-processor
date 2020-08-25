@@ -15,67 +15,145 @@ from mp.io.loader import s3_loader
 
 from tests.mp import mock_event_keys, apig_event_sample
 
-# mock_info
-# mock debug
-# mock configure_logging
-# mock init_monitoring
-# mock configure_scope
-#      _enter_
-#      _exit_
-#      scope.set_tag
-#      scope.set_extra
-# mock environ.get
-# mock extract_image_key_from_apig_event
-# mock check_force_update
-# mock key_exists
-# mock init_writer
-#      _enter_
-#      _exit_
-#      writer.exists
-# mock write_metadata
-# mock generate_json_respone
 
-mock_s3 = MagicMock()
-mock_s3.list_objects_v2 = MagicMock(return_value=[])
-
-mock_bucket = 'mock_bucket_name'
+MOCK_BUCKET = 'mock_bucket_name'
 
 
-def test_api_handler(mocker):
-    mocker.patch('mp.lambda_common.generate_json_response')
+def test_api_handler_normal_case(mocker):
+    mock_event, mock_s3, mock_writer, mock_sentry_scope = setup_mocks(mocker)
+    mock_key = ImageKey(mock_event['path'][1:])
+
+    actual_response = api_handler(mock_event)
+
+    logging.info.assert_called_once()
+    logging.debug.assert_called_once()
+    tools.configure_logging.assert_called_once()
+    sentry_sdk.configure_scope.assert_called_once()
+    assert_sentry_scope(mock_sentry_scope, mock_event, mock_key)
+    boto3.resource.assert_called_with('s3', region_name=DEFAULT_REGION)
+    mock_s3.list_objects_v2.assert_called_with(
+        Bucket=MOCK_BUCKET, MaxKeys=1, Prefix=mock_key.file_path
+    )
+    mock_writer.__enter__.assert_called_once()
+    mock_writer.exists.assert_called_with(mock_key.file_path)
+    lambda_common.write_metadata.assert_called_with(mock_writer, mock_key)
+    mock_writer.__exit__.assert_called_once()
+
+    assert actual_response['statusCode'] == 200
+    assert mock_key.file_path in actual_response['body']
+
+
+def test_api_handler_force_update(mocker):
+    mock_event, mock_s3, mock_writer, mock_sentry_scope = setup_mocks(
+        mocker, writer_exists_retval=True, force_update_retval=True
+    )
+    mock_key = ImageKey(mock_event['path'][1:])
+
+    actual_response = api_handler(mock_event)
+
+    logging.info.assert_called_once()
+    logging.debug.assert_called_once()
+    tools.configure_logging.assert_called_once()
+    sentry_sdk.configure_scope.assert_called_once()
+    assert_sentry_scope(mock_sentry_scope, mock_event, mock_key)
+    boto3.resource.assert_called_with('s3', region_name=DEFAULT_REGION)
+    mock_s3.list_objects_v2.assert_called_with(
+        Bucket=MOCK_BUCKET, MaxKeys=1, Prefix=mock_key.file_path
+    )
+    mock_writer.__enter__.assert_called_once()
+    mock_writer.exists.assert_called_with(mock_key.file_path)
+    lambda_common.write_metadata.assert_called_with(mock_writer, mock_key)
+    mock_writer.__exit__.assert_called_once()
+
+    assert actual_response['statusCode'] == 200
+    assert mock_key.file_path in actual_response['body']
+
+
+def test_api_handler_skip_force_update(mocker):
+    mock_event, mock_s3, mock_writer, mock_sentry_scope = setup_mocks(
+        mocker, writer_exists_retval=True, force_update_retval=False
+    )
+    mock_key = ImageKey(mock_event['path'][1:])
+
+    actual_response = api_handler(mock_event)
+
+    logging.info.assert_called_once()
+    logging.debug.assert_called_once()
+    tools.configure_logging.assert_called_once()
+    sentry_sdk.configure_scope.assert_called_once()
+    assert_sentry_scope(mock_sentry_scope, mock_event, mock_key)
+    boto3.resource.assert_called_with('s3', region_name=DEFAULT_REGION)
+    mock_s3.list_objects_v2.assert_called_with(
+        Bucket=MOCK_BUCKET, MaxKeys=1, Prefix=mock_key.file_path
+    )
+    mock_writer.__enter__.assert_called_once()
+    mock_writer.exists.assert_called_with(mock_key.file_path)
+    lambda_common.write_metadata.assert_not_called()
+    mock_writer.__exit__.assert_called_once()
+
+    assert actual_response['statusCode'] == 204
+    assert mock_key.file_path in actual_response['body']
+    assert 'not processed' in actual_response['body']
+
+
+def test_api_handler_malformed_event(mocker):
+    mock_event, mock_s3, mock_writer, mock_sentry_scope = setup_mocks(mocker)
+    mock_key = ImageKey(mock_event['path'][1:])
+
+    mock_event['path'] = '/abc/abc/abc'
+
+    actual_response = api_handler(mock_event)
+
+    tools.configure_logging.assert_called_once()
+    logging.info.assert_called_once()
+    logging.debug.assert_called_once()
+    sentry_sdk.configure_scope.assert_not_called()
+    boto3.resource.assert_not_called()
+    mock_s3.list_objects_v2.assert_not_called()
+    mock_writer.__enter__.assert_not_called()
+    mock_writer.exists.assert_not_called()
+    lambda_common.write_metadata.assert_not_called()
+    mock_writer.__exit__.assert_not_called()
+
+    assert actual_response['statusCode'] == 404
+    assert 'not found' in actual_response['body']
+
+
+def assert_sentry_scope(scope, event, key):
+    scope.__enter__.assert_called_once()
+    scope.__enter__().set_extra.assert_called_with('processor_event', event)
+    scope.__enter__().set_tag.call_count == 4
+    scope.__exit__.assert_called_once()
+
+
+def setup_mocks(mocker, writer_exists_retval=False, force_update_retval=False):
+    mock_s3 = MagicMock()
+    # used by s3_loader.key_exists:
+    mock_s3.list_objects_v2 = MagicMock(return_value=mock_event_keys)
+
+    mock_writer = MagicMock()
+    mock_writer.exists = MagicMock(return_value=writer_exists_retval)
+
+    mock_sentry_scope = MagicMock()
+
+    mocker.patch.object(lambda_common, 'write_metadata', MagicMock())
+    mocker.patch.object(
+        lambda_common, 'init_writer', MagicMock(return_value=mock_writer)
+    )
+    mocker.patch.object(
+        lambda_common, 'check_force_update', MagicMock(return_value=force_update_retval)
+    )
     mocker.patch.object(boto3, 'resource', MagicMock(return_value=mock_s3))
-    mocker.patch('mp.io.loader.s3_loader.key_exists')
-    mocker.patch('mp.util.tools.configure_logging')
-    mocker.patch.object(sentry_sdk, 'init')
+    mocker.patch.object(tools, 'configure_logging')
+    mocker.patch.object(
+        sentry_sdk, 'configure_scope', MagicMock(return_value=mock_sentry_scope)
+    )
     mocker.patch.object(logging, 'debug')
     mocker.patch.object(logging, 'info')
 
-    mock_env = {
-        SOURCE_BUCKET: mock_bucket,
-        # MONITORING_DSN: None
-    }
+    mock_env = {SOURCE_BUCKET: MOCK_BUCKET}
     mocker.patch.dict(os.environ, mock_env)
 
     mock_event = deepcopy(apig_event_sample)
-    mock_context = {}
-    mock_key = ImageKey(mock_event_keys[0])
 
-    actual_response = api_handler(mock_event, mock_context)
-
-    # logging.info.assert_called_once()
-    # logging.debug.assert_called_once()
-    # tools.configure_logging.assert_called_once()
-    # s3_loader.key_exists.assert_called_with(mock_key.file_path)
-    # boto3.resource.assert_called_with('s3', region_name=DEFAULT_REGION)
-    # mock_s3.list_objects_v2.assert_called_with(Bucket=mock_bucket, MaxKeys=1, Prefix=mock_key.file_path)
-
-
-# def mock_configure_scope(enter_retval=None, exit_retval=True):
-#     cs = Mock()
-#     if not enter_retval:
-#         enter_retval = cs
-#     cs.__enter__ = Mock(return_value=enter_retval)
-#     cs.__exit__ = Mock(return_value=exit_retval)
-#     cs.set_tag = Mock()
-#     cs.set_extra = Mock()
-#     return cs
+    return mock_event, mock_s3, mock_writer, mock_sentry_scope
