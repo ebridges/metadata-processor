@@ -34,5 +34,5 @@ def download_file_from_s3(key, dest, region=DEFAULT_REGION):
         info(f'{key} downloaded to {dest}')
     except Exception as e:  #  botocore.exceptions.ClientError
         info(f'NOT FOUND: {bucket}/{key}: {e}')
-        if e.response['Error']['Code'] == '404':
+        if e.response.get('Error', {}).get('Code') == '404':
             raise KeyNotFound(f'{bucket}/{key} not found')
