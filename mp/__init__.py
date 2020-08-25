@@ -1,5 +1,6 @@
 version = '0.0.1'
 
+FORCE_UPDATE = 'FORCE_UPDATE'  # env var, also include query string with `update` in it.
 VERBOSE_LOGGING = 'VERBOSE_LOGGING'
 TRIGGER_ERROR = 'TRIGGER_ERROR'
 MONITORING_DSN = 'SENTRY_DSN'

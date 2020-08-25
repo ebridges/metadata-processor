@@ -11,6 +11,7 @@ from mp import (
     MONITORING_DSN,
     OPERATING_ENV,
     DATABASE_URL,
+    FORCE_UPDATE,
 )
 from mp.model.image_key import ImageKey
 from mp.io.loader.s3_loader import download_file_from_s3
@@ -34,17 +35,18 @@ def extract_image_key_from_apig_event(event: object) -> ImageKey:
 
 def extract_image_keys_from_s3_event(event: object) -> [ImageKey]:
     keys = []
-    for record in event['Records']:
+    for record in event.get('Records', []):
         key = record.get('s3', {}).get('object', {}).get('key')
         keys.append(ImageKey(path=key)) if key else None
     return keys
 
 
 def check_force_update(event: object) -> bool:
+    if FORCE_UPDATE in environ:
+        return True
     if not event:
         return None
     qs = event.get('queryStringParameters')
-    print(f'qs: {qs}')
     return True if qs and 'update' in qs else False
 
 
