@@ -6,18 +6,14 @@ import sentry_sdk
 from mp import version, TRIGGER_ERROR
 
 from mp.io.loader.s3_loader import key_exists, download_file_from_s3
-from mp.lambda_common import (
-    extract_image_key_from_apig_event,
-    init_monitoring,
-    generate_json_response,
-)
+from mp.lambda_common import extract_image_key_from_apig_event, generate_json_response
 from mp.util import tools
 from mp import lambda_common
 
 
 def api_handler(event, context={}):
     tools.configure_logging()
-    init_monitoring()
+    lambda_common.init_monitoring()
     logging.info(f'mp v{version}')
     logging.debug(event)
 
