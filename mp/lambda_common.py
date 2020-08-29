@@ -84,12 +84,12 @@ def write_metadata(writer: MetadataWriter, key: ImageKey) -> object:  # pragma: 
         return writer.write(metadata)
 
 
-def generate_json_response(message, httpStatusCode=200):
+def generate_json_response(message, sc=200):
     mesg = {'message': message}
-    debug(f'response {httpStatusCode} with message: {message}')
+    debug(f'response {sc} with message: {message}')
     return {
         'isBase64Encoded': False,
-        'statusCode': httpStatusCode,
+        'statusCode': sc,
         'headers': {'content-type': 'text/json'},
         'body': dumps(mesg),
     }

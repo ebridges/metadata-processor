@@ -18,12 +18,12 @@ class KeyNotFound(Exception):
 def key_exists(key, region=DEFAULT_REGION):
     bucket = environ[SOURCE_BUCKET]
     s3 = boto3.resource('s3', region_name=region)
-    objs = s3.list_objects_v2(Bucket=bucket, MaxKeys=1, Prefix=key,)
+    objs = s3.list_objects_v2(Bucket=bucket, MaxKeys=1, Prefix=key)
     return any([w == key for w in objs])
 
 
 def download_file_from_s3(key, dest, region=DEFAULT_REGION):
-    bucket = environ(SOURCE_BUCKET)
+    bucket = environ[SOURCE_BUCKET]
 
     info(f'downloading s3://{bucket}:{key} to {dest}')
     s3 = boto3.resource('s3', region_name=region)
