@@ -5,6 +5,7 @@ from fractions import Fraction
 from pyexiv2 import Image, set_log_level
 
 from mp.model import *
+from mp.io.metadata_tags import *
 from mp.model.metadata import Metadata
 from mp.model.utils import parse_date
 
@@ -38,10 +39,10 @@ def extract_metadata(image_key, image_file, verbose=False):
             raise ValueError(f'unable to read create date from {image_file}')
         md[CREATE_DATE] = cd
 
-        md[ARTIST] = resolve_str(exif, ['Exif.Image.Artist'])
-        md[CAMERA_MAKE] = resolve_str(exif, ['Exif.Image.Make'])
-        md[CAMERA_MODEL] = resolve_str(exif, ['Exif.Image.Model'])
-        md[ISO_SPEED] = resolve_int(exif, ['Exif.Photo.ISOSpeedRatings'])
+        md[ARTIST] = resolve_str(exif, [TAG_IMAGE_ARTIST])
+        md[CAMERA_MAKE] = resolve_str(exif, [TAG_IMAGE_MAKE])
+        md[CAMERA_MODEL] = resolve_str(exif, [TAG_IMAGE_MODEL])
+        md[ISO_SPEED] = resolve_int(exif, [TAG_PHOTO_ISOSPEEDRATINGS])
 
         md[APERTURE] = extract_aperture(exif)
 
@@ -63,25 +64,25 @@ def extract_metadata(image_key, image_file, verbose=False):
 
 
 def extract_gps_coords(md):
-    lat = extract_gps_degrees(md, ['Exif.GPSInfo.GPSLatitude'])
-    lat_ref = resolve_str(md, ['Exif.GPSInfo.GPSLatitudeRef'])
+    lat = extract_gps_degrees(md, [TAG_GPSINFO_GPSLATITUDE])
+    lat_ref = resolve_str(md, [TAG_GPSINFO_GPSLATITUDEREF])
     if lat_ref != 'N':
         lat = 0 - lat
 
-    lon = extract_gps_degrees(md, ['Exif.GPSInfo.GPSLongitude'])
-    lon_ref = resolve_str(md, ['Exif.GPSInfo.GPSLongitudeRef'])
+    lon = extract_gps_degrees(md, [TAG_GPSINFO_GPSLONGITUDE])
+    lon_ref = resolve_str(md, [TAG_GPSINFO_GPSLONGITUDEREF])
     if lon_ref != 'E':
         lon = 0 - lon
 
-    r = resolve_rational(resolve_str(md, ['Exif.GPSInfo.GPSAltitude']))
+    r = resolve_rational(resolve_str(md, [TAG_GPSINFO_GPSALTITUDE]))
     alt = rational_to_float(r, 2)
 
     return lat, lon, alt
 
 
 def extract_focal_length(md):
-    f = resolve_str(md, ['Exif.Photo.FocalLengthIn35mmFilm'])
-    fl = resolve_str(md, ['Exif.Photo.FocalLength'])
+    f = resolve_str(md, [TAG_PHOTO_FOCALLENGTHIN35MMFILM])
+    fl = resolve_str(md, [TAG_PHOTO_FOCALLENGTH])
     r = resolve_rational(fl)
     if f and r:
         return (f'{f}mm',) + r
@@ -90,7 +91,7 @@ def extract_focal_length(md):
 
 
 def extract_shutter_speed(md):
-    v = resolve_str(md, ['Exif.Photo.ShutterSpeedValue'])
+    v = resolve_str(md, [TAG_PHOTO_SHUTTERSPEEDVALUE])
     r = resolve_rational(v)
     f = rational_to_float(r)
     ss = apex_to_shutterspeed(f)
@@ -101,7 +102,7 @@ def extract_shutter_speed(md):
 
 
 def extract_aperture(md):
-    v = resolve_str(md, ['Exif.Photo.ApertureValue'])
+    v = resolve_str(md, [TAG_PHOTO_APERTUREVALUE])
     r = resolve_rational(v)
     f = rational_to_float(r)
     a = apex_to_aperture(f)
@@ -110,13 +111,13 @@ def extract_aperture(md):
 
 def extract_dimensions(md):
     w_keys = [
-        'Exif.Image.ImageWidth',
-        'Exif.Photo.PixelXDimension',
+        TAG_IMAGE_IMAGEWIDTH,
+        TAG_PHOTO_PIXELXDIMENSION,
     ]
     width = resolve_int(md, w_keys)
     h_keys = [
-        'Exif.Image.ImageLength',
-        'Exif.Photo.PixelYDimension',
+        TAG_IMAGE_IMAGELENGTH,
+        TAG_PHOTO_PIXELYDIMENSION,
     ]
     height = resolve_int(md, h_keys)
     return width, height
@@ -124,9 +125,9 @@ def extract_dimensions(md):
 
 def extract_createdate_exif(md):
     keys = [
-        'Exif.Photo.DateTimeDigitized',
-        'Exif.Photo.DateTimeOriginal',
-        'Exif.Image.DateTime',
+        TAG_PHOTO_DATETIMEDIGITIZED,
+        TAG_PHOTO_DATETIMEORIGINAL,
+        TAG_IMAGE_DATETIME,
     ]
     dt = resolve_str(md, keys)
     return parse_date(dt)
@@ -152,12 +153,12 @@ def extract_gps_datetime(md):
 
 
 def extract_gps_date(md):
-    v = resolve_str(md, ['Exif.GPSInfo.GPSDateStamp'])
+    v = resolve_str(md, [TAG_GPSINFO_GPSDATESTAMP])
     return v.replace(' ', '') if v else None
 
 
 def extract_gps_time(md):
-    v = resolve_str(md, ['Exif.GPSInfo.GPSTimeStamp'])
+    v = resolve_str(md, [TAG_GPSINFO_GPSTIMESTAMP])
     if v:
         time = []
         for vv in v.split(' '):

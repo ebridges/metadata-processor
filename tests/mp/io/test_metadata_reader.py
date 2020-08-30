@@ -21,6 +21,7 @@ from mp.io.metadata_reader import (
     resolve_str,
 )
 from mp.model import *
+from mp.io.metadata_tags import *
 from mp.model.metadata import Metadata, create_day_id
 from mp.model.image_key import ImageKey
 
@@ -83,11 +84,11 @@ def test_extract_metadata_CreateDateFromXmp():
 
 def test_extract_gps_coords():
     md = {
-        'Exif.GPSInfo.GPSAltitude': '0/1000',
-        'Exif.GPSInfo.GPSLatitude': '40/1 43/1 507/100',
-        'Exif.GPSInfo.GPSLatitudeRef': 'N',
-        'Exif.GPSInfo.GPSLongitude': '73/1 57/1 4541/100',
-        'Exif.GPSInfo.GPSLongitudeRef': 'W',
+        TAG_GPSINFO_GPSALTITUDE: '0/1000',
+        TAG_GPSINFO_GPSLATITUDE: '40/1 43/1 507/100',
+        TAG_GPSINFO_GPSLATITUDEREF: 'N',
+        TAG_GPSINFO_GPSLONGITUDE: '73/1 57/1 4541/100',
+        TAG_GPSINFO_GPSLONGITUDEREF: 'W',
     }
     expected = (40.718075, -73.9626138888889, 0.0)
     actual = extract_gps_coords(md)
@@ -96,8 +97,8 @@ def test_extract_gps_coords():
 
 def test_extract_focal_length():
     md = {
-        'Exif.Photo.FocalLengthIn35mmFilm': '27',
-        'Exif.Photo.FocalLength': '4440/1000',
+        TAG_PHOTO_FOCALLENGTHIN35MMFILM: '27',
+        TAG_PHOTO_FOCALLENGTH: '4440/1000',
     }
     expected = ('27mm', 4440, 1000)
     actual = extract_focal_length(md)
@@ -105,14 +106,14 @@ def test_extract_focal_length():
 
 
 def test_extract_shutter_speed():
-    md = {'Exif.Photo.ShutterSpeedValue': '391/100'}
+    md = {TAG_PHOTO_SHUTTERSPEEDVALUE: '391/100'}
     expected = ('1/15 sec', 391, 100)
     actual = extract_shutter_speed(md)
     assert expected == actual
 
 
 def test_extract_aperture():
-    md = {'Exif.Photo.ApertureValue': '170/100'}
+    md = {TAG_PHOTO_APERTUREVALUE: '170/100'}
     expected = 'f/1.8'
     actual = extract_aperture(md)
     assert expected == actual
@@ -120,8 +121,8 @@ def test_extract_aperture():
 
 def test_extract_dimensions():
     md = {
-        'Exif.Image.ImageWidth': '123',
-        'Exif.Image.ImageLength': '456',
+        TAG_IMAGE_IMAGEWIDTH: '123',
+        TAG_IMAGE_IMAGELENGTH: '456',
     }
     expected = (123, 456)
     actual = extract_dimensions(md)
@@ -130,8 +131,8 @@ def test_extract_dimensions():
 
 def test_extract_dimensions_alt1():
     md = {
-        'Exif.Photo.PixelXDimension': '123',
-        'Exif.Photo.PixelYDimension': '456',
+        TAG_PHOTO_PIXELXDIMENSION: '123',
+        TAG_PHOTO_PIXELYDIMENSION: '456',
     }
     expected = (123, 456)
     actual = extract_dimensions(md)
@@ -140,8 +141,8 @@ def test_extract_dimensions_alt1():
 
 def test_extract_dimensions_alt2():
     md = {
-        'Exif.Photo.PixelXDimension': '123',
-        'Exif.Image.ImageLength': '456',
+        TAG_PHOTO_PIXELXDIMENSION: '123',
+        TAG_IMAGE_IMAGELENGTH: '456',
     }
     expected = (123, 456)
     actual = extract_dimensions(md)
@@ -150,7 +151,7 @@ def test_extract_dimensions_alt2():
 
 def test_extract_createdate_gooddate():
     md = {
-        'Exif.Image.DateTime': '2019-02-24T20:51:15',
+        TAG_IMAGE_DATETIME: '2019-02-24T20:51:15',
     }
     expected = datetime(2019, 2, 24, 20, 51, 15)
     actual = extract_createdate_exif(md)
@@ -159,8 +160,8 @@ def test_extract_createdate_gooddate():
 
 def test_extract_createdate_baddate():
     md = {
-        'Exif.Photo.DateTimeDigitized': 'bad date',
-        'Exif.Photo.DateTimeOriginal': '2019-02-24T20:51:15',
+        TAG_PHOTO_DATETIMEDIGITIZED: 'bad date',
+        TAG_PHOTO_DATETIMEORIGINAL: '2019-02-24T20:51:15',
     }
     expected = None
     actual = extract_createdate_exif(md)
@@ -169,8 +170,8 @@ def test_extract_createdate_baddate():
 
 def test_extract_gps_datetime():
     md = {
-        'Exif.GPSInfo.GPSDateStamp': '2019: 02: 25',
-        'Exif.GPSInfo.GPSTimeStamp': '1/1 51/1 8/1',
+        TAG_GPSINFO_GPSDATESTAMP: '2019: 02: 25',
+        TAG_GPSINFO_GPSTIMESTAMP: '1/1 51/1 8/1',
     }
     expected = '2019-02-25T01:51:08+00:00'
     dt = extract_gps_datetime(md)
@@ -179,14 +180,14 @@ def test_extract_gps_datetime():
 
 
 def test_extract_gps_date():
-    md = {'Exif.GPSInfo.GPSDateStamp': '2019: 02: 25'}
+    md = {TAG_GPSINFO_GPSDATESTAMP: '2019: 02: 25'}
     expected = '2019:02:25'
     actual = extract_gps_date(md)
     assert expected == actual
 
 
 def test_extract_gps_time():
-    md = {'Exif.GPSInfo.GPSTimeStamp': '1/1 51/1 8/1'}
+    md = {TAG_GPSINFO_GPSTIMESTAMP: '1/1 51/1 8/1'}
     expected = '01:51:08'
     actual = extract_gps_time(md)
     assert expected == actual
