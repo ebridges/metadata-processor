@@ -9,14 +9,6 @@ from mp.io.metadata_tags import *
 from mp.model.metadata import Metadata
 from mp.model.utils import parse_date
 
-log_levels = {
-    'debug': 0,
-    'info': 1,
-    'warn': 2,
-    'error': 3,
-    'mute': 4,
-}
-
 
 def extract_metadata(image_key, image_file, verbose=False):
     log_level = 'debug' if verbose else 'warn'
@@ -28,7 +20,6 @@ def extract_metadata(image_key, image_file, verbose=False):
         MIME_TYPE: image_key.mime_type,
     }
     with Image(image_file) as img:
-        set_log_level(log_levels[log_level])
         exif = img.read_exif()
 
         cd = extract_createdate_exif(exif)
