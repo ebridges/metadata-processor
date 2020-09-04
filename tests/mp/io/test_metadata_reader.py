@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 
 from PIL.TiffImagePlugin import IFDRational
 
+from pytest import raises
+
 from mp.io.metadata_reader import (
     apex_to_aperture,
     apex_to_shutterspeed,
@@ -67,6 +69,16 @@ def test_extract_metadata():
     actual = extract_metadata(image_key, image_file)
 
     assert expected == actual
+
+
+def test_extract_metadata_MissingMetadata():
+    image_slug = (
+        '57f738b8-700f-11e9-90ab-320017981ea0/9d90b8f3-113d-4476-afe8-9fc0ac265850.jpg'
+    )
+    image_file = f'{CURRENT_DIR}/img/testExtractMetadata_MissingMetadata/IMG_1770.jpg'
+    image_key = ImageKey(image_slug)
+    with raises(ValueError):
+        extract_metadata(image_key, image_file)
 
 
 def test_extract_metadata_CreateDateFromXmp():
