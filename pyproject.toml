@@ -11,6 +11,7 @@ psycopg2 = "^2.8.5"
 click = "^7.1.2"
 sentry_sdk = "^0.16.5"
 pillow = "^7.2.0"
+lxml = "^4.5.2"
 
 [tool.poetry.dev-dependencies]
 pre-commit = "^2.3.0"
