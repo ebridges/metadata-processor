@@ -1,3 +1,9 @@
+## v1.1.1 (2020-09-04)
+
+### Fix
+
+- switch to binary dist of pycopg to ensure libpq ends up in lambda bundle. update some other deps as well.
+
 ## v1.1.0 (2020-09-04)
 
 ### Fix
