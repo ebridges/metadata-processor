@@ -1,5 +1,3 @@
-from io import StringIO
-from unittest.mock import patch
 from assertpy import assert_that
 from datetime import datetime
 
@@ -52,11 +50,9 @@ def test_equal():
 def test_not_equal():
     left = Metadata(args={})
     right = Metadata(args={MIME_TYPE: 'foo/bar'})
-    with patch('sys.stdout', new=StringIO()) as mock_stdout:
-        result = left.__eq__(right)
-        assert result == False
-        output = mock_stdout.getvalue()
-        assert_that(output).contains(MIME_TYPE)
+    result = left.__eq__(right)
+    assert result == False
+    assert left.mime_type != right.mime_type
 
 
 def test_not_equal_different_types():
