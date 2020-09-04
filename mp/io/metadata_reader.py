@@ -1,8 +1,11 @@
+from logging import warning, debug
 from datetime import timezone
 from pathlib import Path
 from fractions import Fraction
 
-from pyexiv2 import Image, set_log_level
+from PIL.Image import open as pillow_open
+from PIL.ExifTags import TAGS
+from lxml import etree
 
 from mp.model import *
 from mp.io.metadata_tags import *
@@ -10,8 +13,7 @@ from mp.model.metadata import Metadata
 from mp.model.utils import parse_date
 
 
-def extract_metadata(image_key, image_file, verbose=False):
-    log_level = 'debug' if verbose else 'warn'
+def extract_metadata(image_key, image_file):
     md = {
         IMAGE_ID: image_key.image_id,
         OWNER_ID: image_key.owner_id,
@@ -19,15 +21,18 @@ def extract_metadata(image_key, image_file, verbose=False):
         FILE_SIZE: Path(image_file).stat().st_size,
         MIME_TYPE: image_key.mime_type,
     }
-    with Image(image_file) as img:
-        exif = img.read_exif()
+
+    with pillow_open(image_file) as img:
+        dic = img._getexif() or {}
+        exif = {TAGS.get(k): v for k, v in dic.items()}
 
         cd = extract_createdate_exif(exif)
         if not cd:
-            xmp = img.read_xmp()
-            cd = extract_createdate_xmp(xmp)
+            warning(f'No create date in EXIF metadata of {image_key}, using XMP.')
+            cd = extract_createdate_xmp(img, image_key)
         if not cd:
             raise ValueError(f'unable to read create date from {image_file}')
+        debug(f'Found create date {cd} for image {image_key}')
         md[CREATE_DATE] = cd
 
         md[ARTIST] = resolve_str(exif, [TAG_IMAGE_ARTIST])
@@ -43,75 +48,61 @@ def extract_metadata(image_key, image_file, verbose=False):
         ff = extract_focal_length(exif)
         md[FOCAL_LENGTH], md[FOCAL_LENGTH_N], md[FOCAL_LENGTH_D] = ff
 
-        dd = extract_dimensions(exif)
-        md[IMAGE_WIDTH], md[IMAGE_HEIGHT] = dd
+        md[IMAGE_WIDTH], md[IMAGE_HEIGHT] = img.size
 
         gps = extract_gps_coords(exif)
-        md[GPS_LAT], md[GPS_LON], md[GPS_ALT] = gps
+        md[GPS_LAT], md[GPS_LON], md[GPS_ALT], md[GPS_DATE_TIME] = gps
 
-        md[GPS_DATE_TIME] = extract_gps_datetime(exif)
-
+    debug(f'Metadata for {image_key}: {md}')
     return Metadata(args=md)
 
 
 def extract_gps_coords(md):
-    lat = extract_gps_degrees(md, [TAG_GPSINFO_GPSLATITUDE])
-    lat_ref = resolve_str(md, [TAG_GPSINFO_GPSLATITUDEREF])
+    gps_md = md.get(TAG_GPSINFO)
+
+    if not gps_md:
+        return None, None, None, None
+
+    lat = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLATITUDE])
+    lat_ref = resolve_str(gps_md, [TAG_GPSINFO_GPSLATITUDEREF])
     if lat_ref != 'N':
         lat = 0 - lat
 
-    lon = extract_gps_degrees(md, [TAG_GPSINFO_GPSLONGITUDE])
-    lon_ref = resolve_str(md, [TAG_GPSINFO_GPSLONGITUDEREF])
+    lon = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLONGITUDE])
+    lon_ref = resolve_str(gps_md, [TAG_GPSINFO_GPSLONGITUDEREF])
     if lon_ref != 'E':
         lon = 0 - lon
 
-    r = resolve_rational(resolve_str(md, [TAG_GPSINFO_GPSALTITUDE]))
-    alt = rational_to_float(r, 2)
+    v = resolve_val(gps_md, [TAG_GPSINFO_GPSALTITUDE])
 
-    return lat, lon, alt
+    dt = extract_gps_datetime(gps_md)
+
+    return lat, lon, float(v), dt
 
 
 def extract_focal_length(md):
-    f = resolve_str(md, [TAG_PHOTO_FOCALLENGTHIN35MMFILM])
-    fl = resolve_str(md, [TAG_PHOTO_FOCALLENGTH])
-    r = resolve_rational(fl)
+    f = resolve_val(md, [TAG_PHOTO_FOCALLENGTHIN35MMFILM])
+    r = resolve_val(md, [TAG_PHOTO_FOCALLENGTH])
     if f and r:
-        return (f'{f}mm',) + r
+        return (f'{f}mm',) + resolve_rational(r)
     else:
         return (None, None, None)
 
 
 def extract_shutter_speed(md):
-    v = resolve_str(md, [TAG_PHOTO_SHUTTERSPEEDVALUE])
-    r = resolve_rational(v)
-    f = rational_to_float(r)
-    ss = apex_to_shutterspeed(f)
-    if ss and r:
-        return f'{ss[0]}/{ss[1]} sec', r[0], r[1]
+    v = resolve_val(md, [TAG_PHOTO_SHUTTERSPEEDVALUE])
+    ss = apex_to_shutterspeed(v)
+    if ss and v:
+        return f'{ss[0]}/{ss[1]} sec', v.numerator, v.denominator
     else:
         return (None, None, None)
 
 
 def extract_aperture(md):
-    v = resolve_str(md, [TAG_PHOTO_APERTUREVALUE])
-    r = resolve_rational(v)
-    f = rational_to_float(r)
-    a = apex_to_aperture(f)
-    return f'f/{a}'
-
-
-def extract_dimensions(md):
-    w_keys = [
-        TAG_IMAGE_IMAGEWIDTH,
-        TAG_PHOTO_PIXELXDIMENSION,
-    ]
-    width = resolve_int(md, w_keys)
-    h_keys = [
-        TAG_IMAGE_IMAGELENGTH,
-        TAG_PHOTO_PIXELYDIMENSION,
-    ]
-    height = resolve_int(md, h_keys)
-    return width, height
+    v = resolve_val(md, [TAG_PHOTO_APERTUREVALUE])
+    a = apex_to_aperture(v)
+    if v:
+        return f'f/{a}'
 
 
 def extract_createdate_exif(md):
@@ -124,23 +115,37 @@ def extract_createdate_exif(md):
     return parse_date(dt)
 
 
-def extract_createdate_xmp(md):
-    keys = [
-        'Xmp.xmp.CreateDate',
-    ]
-    dt = resolve_str(md, keys)
-
-    # XMP Create Date includes a TZ, but we remove
-    # it to conform with EXIF create dates, which do
-    # not include it
-    return parse_date(dt)
+def extract_createdate_xmp(image, image_key):
+    for segment, content in image.applist:
+        try:
+            marker, body = content.decode('utf-8').split('\x00', 1)
+        except:
+            continue
+        if segment == 'APP1' and marker == 'http://ns.adobe.com/xap/1.0/':
+            try:
+                create_date_xpath = '//@xmp:CreateDate'
+                xml = etree.fromstring(body)
+                date = xml.xpath(
+                    '//@xmp:CreateDate',
+                    namespaces={'xmp': 'http://ns.adobe.com/xap/1.0/'},
+                )
+                if date and len(date) > 0:
+                    # XMP Create Date includes a TZ, but we remove
+                    # it to conform with EXIF create dates, which do
+                    # not include it
+                    return parse_date(date[0])
+                else:
+                    warning('no create date found in xmp metadata.')
+            except Exception as e:
+                warning(f'Exception with image [{image_key}] parsing XMP XML: {e}')
 
 
 def extract_gps_datetime(md):
     dt = extract_gps_date(md)
     ti = extract_gps_time(md)
-    date = f'{dt} {ti}'
-    return parse_date(date, tz=timezone.utc)
+    if dt and ti:
+        date = f'{dt} {ti}'
+        return parse_date(date, tz=timezone.utc)
 
 
 def extract_gps_date(md):
@@ -149,41 +154,50 @@ def extract_gps_date(md):
 
 
 def extract_gps_time(md):
-    v = resolve_str(md, [TAG_GPSINFO_GPSTIMESTAMP])
+    v = resolve_tuple_int(md, [TAG_GPSINFO_GPSTIMESTAMP])
     if v:
-        time = []
-        for vv in v.split(' '):
-            f = rational_to_float(resolve_rational(vv), 0)
-            time.append(f) if f else None
-        return ':'.join(['%02d' % t for t in time])
+        return ':'.join(['%02d' % t for t in v])
 
 
 def extract_gps_degrees(md, keys):
-    v = resolve_str(md, keys)
-    dms = []
+    v = resolve_tuple(md, keys)
     if v:
-        for vv in v.split(' '):
-            f = rational_to_float(resolve_rational(vv), 10)
-            dms.append(f)
-        return dms[0] + (dms[1] / 60.0) + (dms[2] / 3600.0)
+        return v[0] + (v[1] / 60.0) + (v[2] / 3600.0)
     else:
         return 0
 
 
 def resolve_str(md, keys):
-    '''Pulls the first value in md that matches a one of the given keys'''
-    for key in keys:
-        if key in md and md.get(key):
-            return md[key]
+    v = resolve_val(md, keys)
+    if v:
+        return str(v)
 
 
 def resolve_int(md, keys):
     v = resolve_str(md, keys)
-    return int(v) if v else None
+    if v:
+        return int(v)
+
+
+def resolve_tuple_int(md, keys):
+    v = resolve_tuple(md, keys)
+    if v:
+        return tuple(map(int, v))
+
+
+def resolve_tuple(md, keys):
+    v = resolve_val(md, keys)
+    return v if type(v) in [list, tuple] else None
+
+
+def resolve_val(md, keys):
+    for key in keys:
+        if key in md:
+            return md[key]
 
 
 def resolve_rational(v):
-    return tuple([int(vv) for vv in v.split('/')]) if v else (None, None)
+    return (v.numerator, v.denominator) if v else (None, None)
 
 
 def apex_to_aperture(v):
@@ -195,11 +209,3 @@ def apex_to_shutterspeed(v):
         p = round(pow(2, -v), 4)
         f = Fraction(p).limit_denominator(100)
         return (f.numerator, f.denominator)
-
-
-def rational_to_float(v, p=1):
-    if any(map(lambda x: x is None, v)):
-        return None
-    if not v[1]:
-        return 0
-    return round(v[0] / v[1], p)
