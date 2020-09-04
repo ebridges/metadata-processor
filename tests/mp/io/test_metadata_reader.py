@@ -1,12 +1,13 @@
 from os.path import dirname
-from datetime import datetime
+from datetime import datetime, timezone
+
+from PIL.TiffImagePlugin import IFDRational
 
 from mp.io.metadata_reader import (
     apex_to_aperture,
     apex_to_shutterspeed,
     extract_aperture,
     extract_createdate_exif,
-    extract_dimensions,
     extract_focal_length,
     extract_gps_coords,
     extract_gps_date,
@@ -15,7 +16,6 @@ from mp.io.metadata_reader import (
     extract_gps_time,
     extract_metadata,
     extract_shutter_speed,
-    rational_to_float,
     resolve_int,
     resolve_rational,
     resolve_str,
@@ -84,13 +84,22 @@ def test_extract_metadata_CreateDateFromXmp():
 
 def test_extract_gps_coords():
     md = {
-        TAG_GPSINFO_GPSALTITUDE: '0/1000',
-        TAG_GPSINFO_GPSLATITUDE: '40/1 43/1 507/100',
-        TAG_GPSINFO_GPSLATITUDEREF: 'N',
-        TAG_GPSINFO_GPSLONGITUDE: '73/1 57/1 4541/100',
-        TAG_GPSINFO_GPSLONGITUDEREF: 'W',
+        TAG_GPSINFO: {
+            TAG_GPSINFO_GPSALTITUDE: 0.0,
+            TAG_GPSINFO_GPSLATITUDE: (40.0, 43.0, 5.07),
+            TAG_GPSINFO_GPSLATITUDEREF: 'N',
+            TAG_GPSINFO_GPSLONGITUDE: (73.0, 57.0, 45.41),
+            TAG_GPSINFO_GPSLONGITUDEREF: 'W',
+            TAG_GPSINFO_GPSDATESTAMP: '2020:01:02',
+            TAG_GPSINFO_GPSTIMESTAMP: (3.0, 4.0, 5.0),
+        }
     }
-    expected = (40.718075, -73.9626138888889, 0.0)
+    expected = (
+        40.718075,
+        -73.9626138888889,
+        0.0,
+        datetime(2020, 1, 2, 3, 4, 5, tzinfo=timezone.utc),
+    )
     actual = extract_gps_coords(md)
     assert expected == actual
 
@@ -98,7 +107,7 @@ def test_extract_gps_coords():
 def test_extract_focal_length():
     md = {
         TAG_PHOTO_FOCALLENGTHIN35MMFILM: '27',
-        TAG_PHOTO_FOCALLENGTH: '4440/1000',
+        TAG_PHOTO_FOCALLENGTH: IFDRational(4440, 1000),
     }
     expected = ('27mm', 4440, 1000)
     actual = extract_focal_length(md)
@@ -106,46 +115,16 @@ def test_extract_focal_length():
 
 
 def test_extract_shutter_speed():
-    md = {TAG_PHOTO_SHUTTERSPEEDVALUE: '391/100'}
+    md = {TAG_PHOTO_SHUTTERSPEEDVALUE: IFDRational(391, 100)}
     expected = ('1/15 sec', 391, 100)
     actual = extract_shutter_speed(md)
     assert expected == actual
 
 
 def test_extract_aperture():
-    md = {TAG_PHOTO_APERTUREVALUE: '170/100'}
+    md = {TAG_PHOTO_APERTUREVALUE: IFDRational(170, 100)}
     expected = 'f/1.8'
     actual = extract_aperture(md)
-    assert expected == actual
-
-
-def test_extract_dimensions():
-    md = {
-        TAG_IMAGE_IMAGEWIDTH: '123',
-        TAG_IMAGE_IMAGELENGTH: '456',
-    }
-    expected = (123, 456)
-    actual = extract_dimensions(md)
-    assert expected == actual
-
-
-def test_extract_dimensions_alt1():
-    md = {
-        TAG_PHOTO_PIXELXDIMENSION: '123',
-        TAG_PHOTO_PIXELYDIMENSION: '456',
-    }
-    expected = (123, 456)
-    actual = extract_dimensions(md)
-    assert expected == actual
-
-
-def test_extract_dimensions_alt2():
-    md = {
-        TAG_PHOTO_PIXELXDIMENSION: '123',
-        TAG_IMAGE_IMAGELENGTH: '456',
-    }
-    expected = (123, 456)
-    actual = extract_dimensions(md)
     assert expected == actual
 
 
@@ -171,7 +150,7 @@ def test_extract_createdate_baddate():
 def test_extract_gps_datetime():
     md = {
         TAG_GPSINFO_GPSDATESTAMP: '2019: 02: 25',
-        TAG_GPSINFO_GPSTIMESTAMP: '1/1 51/1 8/1',
+        TAG_GPSINFO_GPSTIMESTAMP: (1.0, 51.0, 8.0),
     }
     expected = '2019-02-25T01:51:08+00:00'
     dt = extract_gps_datetime(md)
@@ -187,14 +166,14 @@ def test_extract_gps_date():
 
 
 def test_extract_gps_time():
-    md = {TAG_GPSINFO_GPSTIMESTAMP: '1/1 51/1 8/1'}
+    md = {TAG_GPSINFO_GPSTIMESTAMP: (1.0, 51.0, 8)}
     expected = '01:51:08'
     actual = extract_gps_time(md)
     assert expected == actual
 
 
 def test_extract_gps_degrees():
-    md = {'aaa': '73/1 57/1 4541/100', 'bbb': '40/1 43/1 507/100'}
+    md = {'aaa': (73.0, 57.0, 45.41), 'bbb': (40.0, 43.0, 5.07)}
     keys = ['bbb']
     expected = 40.718075
     actual = extract_gps_degrees(md, keys)
@@ -209,28 +188,8 @@ def test_resolve_str():
     assert expected == actual
 
 
-def test_rational_to_float():
-    undertest = (2, 3)
-    expected = 0.67
-    actual = rational_to_float(undertest, p=2)
-    assert expected == actual
-
-
-def test_rational_to_float_zero_denominator():
-    undertest = (2, 0)
-    expected = 0
-    actual = rational_to_float(undertest)
-    assert expected == actual
-
-
-def test_rational_to_float_none_denominator():
-    undertest = (2, None)
-    actual = rational_to_float(undertest)
-    assert actual is None
-
-
 def test_resolve_rational():
-    undertest = '222/444'
+    undertest = IFDRational(222, 444)
     expected = (222, 444)
     actual = resolve_rational(undertest)
     assert expected == actual
