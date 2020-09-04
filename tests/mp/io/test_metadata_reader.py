@@ -102,6 +102,28 @@ def test_extract_gps_coords():
     assert expected == actual
 
 
+def test_extract_gps_coords_flip_coords():
+    md = {
+        TAG_GPSINFO: {
+            TAG_GPSINFO_GPSALTITUDE: 0.0,
+            TAG_GPSINFO_GPSLATITUDE: (40.0, 43.0, 5.07),
+            TAG_GPSINFO_GPSLATITUDEREF: 'S',
+            TAG_GPSINFO_GPSLONGITUDE: (73.0, 57.0, 45.41),
+            TAG_GPSINFO_GPSLONGITUDEREF: 'E',
+            TAG_GPSINFO_GPSDATESTAMP: '2020:01:02',
+            TAG_GPSINFO_GPSTIMESTAMP: (3.0, 4.0, 5.0),
+        }
+    }
+    expected = (
+        -40.718075,
+        73.9626138888889,
+        0.0,
+        datetime(2020, 1, 2, 3, 4, 5, tzinfo=timezone.utc),
+    )
+    actual = extract_gps_coords(md)
+    assert expected == actual
+
+
 def test_extract_focal_length():
     md = {
         TAG_PHOTO_FOCALLENGTHIN35MMFILM: '27',
@@ -174,6 +196,14 @@ def test_extract_gps_degrees():
     md = {'aaa': (73.0, 57.0, 45.41), 'bbb': (40.0, 43.0, 5.07)}
     keys = ['bbb']
     expected = 40.718075
+    actual = extract_gps_degrees(md, keys)
+    assert expected == actual
+
+
+def test_extract_gps_degrees_missing():
+    md = {'aaa': None, 'bbb': None}
+    keys = ['bbb']
+    expected = 0
     actual = extract_gps_degrees(md, keys)
     assert expected == actual
 
