@@ -1,3 +1,20 @@
+## v1.1.0 (2020-09-04)
+
+### Fix
+
+- improve coverage on a couple of edge cases
+
+### Refactor
+
+- dont assert on results of debug logging
+- remove two unused "read" functions, and organize functions better.
+- list out inequal fields for easier debugging
+- move tag names to variables
+
+### Feat
+
+- convert logic for reading metadata to be compatible with pillow
+
 ## v1.0.0 (2020-08-29)
 
 ### Feat
