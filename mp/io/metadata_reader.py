@@ -35,10 +35,10 @@ def extract_metadata(image_key, image_file):
         debug(f'Found create date {cd} for image {image_key}')
         md[CREATE_DATE] = cd
 
-        md[ARTIST] = resolve_str(exif, [TAG_IMAGE_ARTIST])
-        md[CAMERA_MAKE] = resolve_str(exif, [TAG_IMAGE_MAKE])
-        md[CAMERA_MODEL] = resolve_str(exif, [TAG_IMAGE_MODEL])
-        md[ISO_SPEED] = resolve_int(exif, [TAG_PHOTO_ISOSPEEDRATINGS])
+        md[ARTIST] = resolve_val(exif, [TAG_IMAGE_ARTIST])
+        md[CAMERA_MAKE] = resolve_val(exif, [TAG_IMAGE_MAKE])
+        md[CAMERA_MODEL] = resolve_val(exif, [TAG_IMAGE_MODEL])
+        md[ISO_SPEED] = resolve_val(exif, [TAG_PHOTO_ISOSPEEDRATINGS])
 
         md[APERTURE] = extract_aperture(exif)
 
@@ -57,61 +57,13 @@ def extract_metadata(image_key, image_file):
     return Metadata(args=md)
 
 
-def extract_gps_coords(md):
-    gps_md = md.get(TAG_GPSINFO)
-
-    if not gps_md:
-        return None, None, None, None
-
-    lat = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLATITUDE])
-    lat_ref = resolve_str(gps_md, [TAG_GPSINFO_GPSLATITUDEREF])
-    if lat_ref != 'N':
-        lat = 0 - lat
-
-    lon = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLONGITUDE])
-    lon_ref = resolve_str(gps_md, [TAG_GPSINFO_GPSLONGITUDEREF])
-    if lon_ref != 'E':
-        lon = 0 - lon
-
-    v = resolve_val(gps_md, [TAG_GPSINFO_GPSALTITUDE])
-
-    dt = extract_gps_datetime(gps_md)
-
-    return lat, lon, float(v), dt
-
-
-def extract_focal_length(md):
-    f = resolve_val(md, [TAG_PHOTO_FOCALLENGTHIN35MMFILM])
-    r = resolve_val(md, [TAG_PHOTO_FOCALLENGTH])
-    if f and r:
-        return (f'{f}mm',) + resolve_rational(r)
-    else:
-        return (None, None, None)
-
-
-def extract_shutter_speed(md):
-    v = resolve_val(md, [TAG_PHOTO_SHUTTERSPEEDVALUE])
-    ss = apex_to_shutterspeed(v)
-    if ss and v:
-        return f'{ss[0]}/{ss[1]} sec', v.numerator, v.denominator
-    else:
-        return (None, None, None)
-
-
-def extract_aperture(md):
-    v = resolve_val(md, [TAG_PHOTO_APERTUREVALUE])
-    a = apex_to_aperture(v)
-    if v:
-        return f'f/{a}'
-
-
 def extract_createdate_exif(md):
     keys = [
         TAG_PHOTO_DATETIMEDIGITIZED,
         TAG_PHOTO_DATETIMEORIGINAL,
         TAG_IMAGE_DATETIME,
     ]
-    dt = resolve_str(md, keys)
+    dt = resolve_val(md, keys)
     return parse_date(dt)
 
 
@@ -140,23 +92,52 @@ def extract_createdate_xmp(image, image_key):
                 warning(f'Exception with image [{image_key}] parsing XMP XML: {e}')
 
 
-def extract_gps_datetime(md):
-    dt = extract_gps_date(md)
-    ti = extract_gps_time(md)
-    if dt and ti:
-        date = f'{dt} {ti}'
-        return parse_date(date, tz=timezone.utc)
+def extract_focal_length(md):
+    f = resolve_val(md, [TAG_PHOTO_FOCALLENGTHIN35MMFILM])
+    r = resolve_val(md, [TAG_PHOTO_FOCALLENGTH])
+    if f and r:
+        return (f'{f}mm',) + resolve_rational(r)
+    else:
+        return (None, None, None)
 
 
-def extract_gps_date(md):
-    v = resolve_str(md, [TAG_GPSINFO_GPSDATESTAMP])
-    return v.replace(' ', '') if v else None
+def extract_shutter_speed(md):
+    v = resolve_val(md, [TAG_PHOTO_SHUTTERSPEEDVALUE])
+    ss = apex_to_shutterspeed(v)
+    if ss and v:
+        return f'{ss[0]}/{ss[1]} sec', v.numerator, v.denominator
+    else:
+        return (None, None, None)
 
 
-def extract_gps_time(md):
-    v = resolve_tuple_int(md, [TAG_GPSINFO_GPSTIMESTAMP])
+def extract_aperture(md):
+    v = resolve_val(md, [TAG_PHOTO_APERTUREVALUE])
+    a = apex_to_aperture(v)
     if v:
-        return ':'.join(['%02d' % t for t in v])
+        return f'f/{a}'
+
+
+def extract_gps_coords(md):
+    gps_md = md.get(TAG_GPSINFO)
+
+    if not gps_md:
+        return None, None, None, None
+
+    lat = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLATITUDE])
+    lat_ref = resolve_val(gps_md, [TAG_GPSINFO_GPSLATITUDEREF])
+    if lat_ref != 'N':
+        lat = 0 - lat
+
+    lon = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLONGITUDE])
+    lon_ref = resolve_val(gps_md, [TAG_GPSINFO_GPSLONGITUDEREF])
+    if lon_ref != 'E':
+        lon = 0 - lon
+
+    v = resolve_val(gps_md, [TAG_GPSINFO_GPSALTITUDE])
+
+    dt = extract_gps_datetime(gps_md)
+
+    return lat, lon, float(v), dt
 
 
 def extract_gps_degrees(md, keys):
@@ -167,16 +148,23 @@ def extract_gps_degrees(md, keys):
         return 0
 
 
-def resolve_str(md, keys):
-    v = resolve_val(md, keys)
-    if v:
-        return str(v)
+def extract_gps_datetime(md):
+    dt = extract_gps_date(md)
+    ti = extract_gps_time(md)
+    if dt and ti:
+        date = f'{dt} {ti}'
+        return parse_date(date, tz=timezone.utc)
 
 
-def resolve_int(md, keys):
-    v = resolve_str(md, keys)
+def extract_gps_date(md):
+    v = resolve_val(md, [TAG_GPSINFO_GPSDATESTAMP])
+    return v.replace(' ', '') if v else None
+
+
+def extract_gps_time(md):
+    v = resolve_tuple_int(md, [TAG_GPSINFO_GPSTIMESTAMP])
     if v:
-        return int(v)
+        return ':'.join(['%02d' % t for t in v])
 
 
 def resolve_tuple_int(md, keys):
