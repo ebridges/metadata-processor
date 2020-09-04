@@ -1,3 +1,4 @@
+from logging import debug
 from uuid import uuid4
 from datetime import datetime
 
@@ -160,10 +161,11 @@ class Metadata:
             # don't attempt to compare against unrelated types
             return NotImplemented
         else:
+            result = True
             for slot in self.__slots__:
                 this = getattr(self, slot[1:])
                 that = getattr(other, slot[1:])
                 if not this == that:
-                    print(f'mismatch on field {slot[1:]}')
-                    return False
-            return True
+                    debug(f'Mismatch on field {slot[1:]}: {this} != {that}')
+                    result = False
+            return result
