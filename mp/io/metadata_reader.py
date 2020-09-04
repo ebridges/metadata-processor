@@ -86,8 +86,6 @@ def extract_createdate_xmp(image, image_key):
                     # it to conform with EXIF create dates, which do
                     # not include it
                     return parse_date(date[0])
-                else:
-                    warning('no create date found in xmp metadata.')
             except Exception as e:
                 warning(f'Exception with image [{image_key}] parsing XMP XML: {e}')
 
