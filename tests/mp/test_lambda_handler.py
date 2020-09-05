@@ -26,11 +26,11 @@ def test_handler_s3_normal_case(mocker):
     trigger_error = True
     event_type = 's3'
     mock_env = {TRIGGER_ERROR: trigger_error}
-    mock_scope = setup_handler(mocker, force_update_retval, trigger_error, event_type)
+    setup_handler(mocker, force_update_retval, trigger_error, event_type)
 
     lambda_handler.handler(mock_event)
 
-    assert_handler(mock_scope)
+    assert_handler()
 
 
 def test_handler_apig_normal_case(mocker):
@@ -38,11 +38,11 @@ def test_handler_apig_normal_case(mocker):
     force_update_retval = False
     trigger_error = True
     event_type = 'api'
-    mock_scope = setup_handler(mocker, force_update_retval, trigger_error, event_type)
+    setup_handler(mocker, force_update_retval, trigger_error, event_type)
 
     lambda_handler.handler(mock_event)
 
-    assert_handler(mock_scope)
+    assert_handler()
 
 
 def test_handler_s3_trigger_error(mocker):
@@ -50,10 +50,8 @@ def test_handler_s3_trigger_error(mocker):
     force_update_retval = False
     trigger_error = 'true'
     event_type = 's3'
-    mock_env = {TRIGGER_ERROR: trigger_error}
-    mock_scope = setup_handler(
-        mocker, force_update_retval, trigger_error, event_type, mock_env=mock_env
-    )
+    env = {TRIGGER_ERROR: trigger_error}
+    setup_handler(mocker, force_update_retval, trigger_error, event_type, mock_env=env)
 
     with raises(Exception):
         lambda_handler.handler(mock_event)
@@ -64,7 +62,7 @@ def test_handler_unrecognized_event_type(mocker):
     force_update_retval = False
     trigger_error = 'true'
     event_type = 'foobar'
-    mock_scope = setup_handler(mocker, force_update_retval, trigger_error, event_type)
+    setup_handler(mocker, force_update_retval, trigger_error, event_type)
 
     with raises(Exception):
         lambda_handler.handler(mock_event)
@@ -274,25 +272,21 @@ def setup_handler(mocker, force_update_retval, trigger_error, event_type, mock_e
     mocker.patch.object(tools, 'configure_logging')
     mocker.patch.object(logging, 'info')
     mocker.patch.object(logging, 'debug')
-    mocker.patch.object(lambda_common, 'init_monitoring')
     mocker.patch.object(
         lambda_common, 'check_force_update', MagicMock(return_value=force_update_retval)
     )
-    mock_scope = MagicMock()
-    mocker.patch.object(sentry_sdk, 'configure_scope', mock_scope)
+    mocker.patch.object(sentry_sdk, 'configure_scope')
     mocker.patch.dict(os.environ, mock_env)
     mocker.patch.object(
         lambda_handler, 'get_event_type', MagicMock(return_value=event_type)
     )
     mocker.patch.object(lambda_handler, 's3_handler')
     mocker.patch.object(lambda_handler, 'api_handler')
-    return mock_scope
 
 
-def assert_handler(scope):
+def assert_handler():
     tools.configure_logging.assert_called_once()
     logging.info.assert_called()
     logging.debug.assert_called()
-    lambda_common.init_monitoring.assert_called_once()
     lambda_common.check_force_update.assert_called_once()
     lambda_handler.get_event_type.assert_called_once()
