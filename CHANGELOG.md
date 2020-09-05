@@ -1,3 +1,9 @@
+## v1.1.3 (2020-09-05)
+
+### Fix
+
+- update tests by relocation of monitoring initialization
+
 ## v1.1.2 (2020-09-05)
 
 ### Fix
