@@ -1,3 +1,9 @@
+## v1.1.2 (2020-09-05)
+
+### Fix
+
+- sentry init must be outside handler.  https://bit.ly/3lSBZtL
+
 ## v1.1.1 (2020-09-04)
 
 ### Fix
