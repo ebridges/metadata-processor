@@ -20,6 +20,33 @@ from tests.mp import (
 )
 
 
+def test_get_event_type_s3():
+    expected = 's3'
+    actual = lambda_handler.get_event_type(s3_put_single_event_sample)
+    assert expected == actual
+
+
+def test_get_event_type_apig():
+    expected = 'api'
+    actual = lambda_handler.get_event_type(apig_event_sample)
+    assert expected == actual
+
+
+def test_get_event_type_none():
+    actual = lambda_handler.get_event_type(None)
+    assert actual is None
+
+
+def test_get_event_type_empty():
+    actual = lambda_handler.get_event_type({})
+    assert actual is None
+
+
+def test_get_event_type_unrecognized():
+    actual = lambda_handler.get_event_type({'foo': 'bar'})
+    assert actual is None
+
+
 def test_handler_s3_normal_case(mocker):
     mock_event = s3_put_single_event_sample
     force_update_retval = False

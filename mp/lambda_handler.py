@@ -38,7 +38,12 @@ def handler(event, context={}):
 
 
 def get_event_type(event):
-    pass
+    if not event:
+        return None
+    if event.get('path'):
+        return 'api'
+    if event.get('Records'):
+        return 's3'
 
 
 def s3_handler(event, scope, context={}, force_update=False):
