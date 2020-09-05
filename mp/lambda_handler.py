@@ -8,13 +8,14 @@ from mp.io.loader import s3_loader
 from mp import lambda_common
 from mp.util import tools
 
+lambda_common.init_monitoring()
+
 
 def handler(event, context={}):
     tools.configure_logging()
     logging.info(f'mp v{version}')
     logging.debug(event)
 
-    lambda_common.init_monitoring()
     force_update = lambda_common.check_force_update(event)
 
     with sentry_sdk.configure_scope() as scope:
