@@ -1,3 +1,9 @@
+## v1.1.8 (2020-09-06)
+
+### Fix
+
+- log metadata in verbose mode before writing it out.
+
 ## v1.1.7 (2020-09-06)
 
 ### Fix
