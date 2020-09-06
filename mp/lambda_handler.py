@@ -50,7 +50,7 @@ def get_event_type(event):
 
 
 def s3_handler(event, scope, context={}, force_update=False):
-    logging.info('s3_handler called.')
+    logging.debug('s3_handler called.')
     keys = lambda_common.extract_image_keys_from_s3_event(event)
 
     writer = lambda_common.init_writer()
@@ -61,17 +61,18 @@ def s3_handler(event, scope, context={}, force_update=False):
 
         if not s3_loader.key_exists(key.file_path):
             bucket = os.environ.get(SOURCE_BUCKET)
-            logging.info(f'{key} not found in bucket: {bucket}.')
+            logging.info(f'NOT FOUND: {key} not found in bucket: {bucket}.')
             continue
 
         with writer:
-            logging.info(f'checking if {key} exists')
+            logging.info(f'checking if metadata for {key} exists in db')
             exists_in_db = writer.exists(key.file_path)
             if not exists_in_db or (exists_in_db and force_update):
                 logging.info('going to extract and write metadata to db')
                 result = lambda_common.write_metadata(key, writer)
                 if result:
                     logging.info(f'result: {result}')
+    logging.info(f'OK: Processing of {len(keys)} record(s) completed')
 
 
 def api_handler(event, scope, context={}, force_update=False):

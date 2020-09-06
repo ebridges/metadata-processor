@@ -25,7 +25,7 @@ from mp.util.tools import parse_db_url
 
 
 def extract_image_key_from_apig_event(event: object) -> ImageKey:
-    info('extract_image_key_from_apig_event called')
+    debug('extract_image_key_from_apig_event called')
     if not event:
         return None
     path = event.get('path')
@@ -36,7 +36,7 @@ def extract_image_key_from_apig_event(event: object) -> ImageKey:
 
 
 def extract_image_keys_from_s3_event(event: object) -> [ImageKey]:
-    info('extract_image_keys_from_s3_event called')
+    debug('extract_image_keys_from_s3_event called')
     keys = []
     if event:
         for record in event.get('Records', []):
@@ -46,7 +46,7 @@ def extract_image_keys_from_s3_event(event: object) -> [ImageKey]:
 
 
 def check_force_update(event: object) -> bool:
-    info('check_force_update called')
+    debug('check_force_update called')
     if FORCE_UPDATE in environ:
         return True
     if not event:
@@ -56,7 +56,7 @@ def check_force_update(event: object) -> bool:
 
 
 def init_monitoring() -> None:  # pragma: no cover
-    info('init_monitoring called')
+    debug('init_monitoring called')
     dsn = environ.get(MONITORING_DSN)
     env = environ.get(OPERATING_ENV)
 
@@ -77,7 +77,7 @@ def init_monitoring() -> None:  # pragma: no cover
 
 
 def init_writer() -> MetadataWriter:  # pragma: no cover
-    info('init_writer called')
+    debug('init_writer called')
     u = environ.get(DATABASE_URL)
     url = parse_db_url(u)
     conn_factory = ConnectionFactory.instance(url)
@@ -85,7 +85,7 @@ def init_writer() -> MetadataWriter:  # pragma: no cover
 
 
 def write_metadata(writer: MetadataWriter, key: ImageKey) -> object:  # pragma: no cover
-    info('write_metadata called')
+    debug('write_metadata called')
     with NamedTemporaryFile(suffix=key.extension) as temp:
         download_file_from_s3(key, temp.name)
         metadata = extract_metadata(key, temp.name)
@@ -93,7 +93,7 @@ def write_metadata(writer: MetadataWriter, key: ImageKey) -> object:  # pragma: 
 
 
 def generate_json_response(message, sc=200):
-    info(f'generate_json_response called {sc}')
+    debug(f'generate_json_response called {sc}')
     mesg = {'message': message}
     debug(f'response {sc} with message: {message}')
     return {
