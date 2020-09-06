@@ -1,3 +1,9 @@
+## v1.1.9 (2020-09-06)
+
+### Fix
+
+- return value logic for `exists` was incorrect
+
 ## v1.1.8 (2020-09-06)
 
 ### Fix

@@ -1,4 +1,4 @@
-version = '1.1.8'
+version = '1.1.9'
 
 FORCE_UPDATE = 'FORCE_UPDATE'  # env var, also include query string with `update` in it.
 VERBOSE_LOGGING = 'VERBOSE_LOGGING'
