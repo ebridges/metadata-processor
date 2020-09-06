@@ -85,7 +85,7 @@ def init_writer() -> MetadataWriter:  # pragma: no cover
 
 
 def write_metadata(writer: MetadataWriter, key: ImageKey) -> object:  # pragma: no cover
-    debug('write_metadata called')
+    debug(f'write_metadata called: {writer} for {key}')
     with NamedTemporaryFile(suffix=key.extension) as temp:
         download_file_from_s3(key, temp.name)
         metadata = extract_metadata(key, temp.name)
