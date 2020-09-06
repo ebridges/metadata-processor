@@ -1,3 +1,9 @@
+## v1.1.4 (2020-09-06)
+
+### Fix
+
+- ensure that db url is parsed in a way consistent with how the CLI parses it.
+
 ## v1.1.3 (2020-09-05)
 
 ### Fix
