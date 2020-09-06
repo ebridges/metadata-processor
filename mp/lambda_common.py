@@ -89,6 +89,7 @@ def write_metadata(writer: MetadataWriter, key: ImageKey) -> object:  # pragma: 
     with NamedTemporaryFile(suffix=key.extension) as temp:
         download_file_from_s3(key, temp.name)
         metadata = extract_metadata(key, temp.name)
+        debug(metadata)
         return writer.write(metadata)
 
 
