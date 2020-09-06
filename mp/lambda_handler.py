@@ -23,6 +23,7 @@ def handler(event, context={}):
         scope.set_tag('force_update', force_update)
 
         if os.environ.get(TRIGGER_ERROR):
+            scope.set_tag(TRIGGER_ERROR, os.environ.get(TRIGGER_ERROR))
             raise Exception('test event')
 
         event_type = get_event_type(event)
