@@ -65,10 +65,10 @@ def s3_handler(event, scope, context={}, force_update=False):
             continue
 
         with writer:
-            logging.info(f'checking if metadata for {key} exists in db')
             exists_in_db = writer.exists(key.file_path)
+            logging.info(f'Data in db {exists_in_db}, force: {force_update}')
             if not exists_in_db or (exists_in_db and force_update):
-                logging.info('going to extract and write metadata to db')
+                logging.info(f'Extracting and writing metadata to db for {key}')
                 result = lambda_common.write_metadata(key, writer)
                 if result:
                     logging.info(f'result: {result}')
