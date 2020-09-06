@@ -25,23 +25,27 @@ class DatabaseUrlType(click.ParamType):
     def convert(self, value, param, ctx):
         try:
             debug(f'parsing database url: {value}')
-            u = urlparse(value)
-            path = u.path if not u.path.startswith('/') else u.path[1:]
-            return {
-                'url': value,
-                'dbtype': u.scheme,
-                'hostname': u.hostname,
-                'port': u.port,
-                'dbname': path,
-                'username': u.username,
-                'password': u.password,
-            }
+            return parse_db_url(value)
         except ValueError as e:
             self.fail(
                 f'DB connection url in unexpected format: {value} ({str(e)})',
                 param,
                 ctx,
             )
+
+
+def parse_db_url(value):
+    u = urlparse(value)
+    path = u.path if not u.path.startswith('/') else u.path[1:]
+    return {
+        'url': value,
+        'dbtype': u.scheme,
+        'hostname': u.hostname,
+        'port': u.port,
+        'dbname': path,
+        'username': u.username,
+        'password': u.password,
+    }
 
 
 def configure_logging(verbose=False):  # pragma: no cover

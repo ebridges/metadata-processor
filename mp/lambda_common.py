@@ -21,6 +21,7 @@ from mp.io.writer.metadata_writer import (
     DatabaseMetadataWriter,
     ConnectionFactory,
 )
+from mp.util.tools import parse_db_url
 
 
 def extract_image_key_from_apig_event(event: object) -> ImageKey:
@@ -72,7 +73,8 @@ def init_monitoring() -> None:  # pragma: no cover
 
 
 def init_writer() -> MetadataWriter:  # pragma: no cover
-    url = environ.get(DATABASE_URL)
+    u = environ.get(DATABASE_URL)
+    url = parse_db_url(u)
     conn_factory = ConnectionFactory.instance(url)
     return DatabaseMetadataWriter(conn_factory)
 
