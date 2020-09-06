@@ -17,7 +17,7 @@ class KeyNotFound(Exception):
 
 def key_exists(key, region=DEFAULT_REGION):
     bucket = environ[SOURCE_BUCKET]
-    s3 = boto3.resource('s3', region_name=region)
+    s3 = boto3.client('s3', region_name=region)
     objs = s3.list_objects_v2(Bucket=bucket, MaxKeys=1, Prefix=key)
     return any([w == key for w in objs])
 
