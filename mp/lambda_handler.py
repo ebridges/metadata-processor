@@ -50,6 +50,7 @@ def get_event_type(event):
 
 
 def s3_handler(event, scope, context={}, force_update=False):
+    logging.info('s3_handler called.')
     keys = lambda_common.extract_image_keys_from_s3_event(event)
 
     writer = lambda_common.init_writer()
@@ -64,14 +65,17 @@ def s3_handler(event, scope, context={}, force_update=False):
             continue
 
         with writer:
+            logging.info(f'checking if {key} exists')
             exists_in_db = writer.exists(key.file_path)
             if not exists_in_db or (exists_in_db and force_update):
+                logging.info('going to extract and write metadata to db')
                 result = lambda_common.write_metadata(key, writer)
                 if result:
                     logging.info(f'result: {result}')
 
 
 def api_handler(event, scope, context={}, force_update=False):
+    logging.info('api_handler called.')
     key = lambda_common.extract_image_key_from_apig_event(event)
     if not key:
         return lambda_common.generate_json_response(
@@ -83,13 +87,16 @@ def api_handler(event, scope, context={}, force_update=False):
     scope.set_tag('image_id', key.image_id)
 
     if not s3_loader.key_exists(key.file_path):
+        logging.info(f'key does not exist {key}')
         return lambda_common.generate_json_response(f'{key} not found.', sc=404)
 
     writer = lambda_common.init_writer()
     with writer:
         exists_in_db = writer.exists(key.file_path)
         if not exists_in_db or (exists_in_db and force_update):
+            logging.info('going to extract and write metadata to db')
             lambda_common.write_metadata(writer, key)
             return lambda_common.generate_json_response(f'{key} processed.')
         else:
+            logging.info('skip writing metadata to db')
             return lambda_common.generate_json_response(f'{key} not processed.', sc=204)
