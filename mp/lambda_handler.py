@@ -29,10 +29,10 @@ def handler(event, context={}):
         event_type = get_event_type(event)
 
         if event_type == 's3':
-            return s3_handler(event, context, scope, force_update)
+            return s3_handler(event, scope, context, force_update)
 
         elif event_type == 'api':
-            return api_handler(event, context, scope, force_update)
+            return api_handler(event, scope, context, force_update)
 
         else:
             raise Exception('unrecognized event')
