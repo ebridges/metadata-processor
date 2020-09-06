@@ -19,6 +19,7 @@ def handler(event, context={}):
     force_update = lambda_common.check_force_update(event)
 
     with sentry_sdk.configure_scope() as scope:
+        logging.info(f'Scope {scope} configured.')
         scope.set_extra('processor_event', event)
         scope.set_tag('force_update', force_update)
 
@@ -28,6 +29,7 @@ def handler(event, context={}):
 
         event_type = get_event_type(event)
 
+        logging.info(f'handling event of type {event_type}')
         if event_type == 's3':
             return s3_handler(event, scope, context, force_update)
 
