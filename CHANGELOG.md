@@ -1,3 +1,10 @@
+## v1.1.12 (2020-09-07)
+
+### Fix
+
+- need to pass a string when looking up key in bucket.
+- skip trying to probe structure of exception.
+
 ## v1.1.11 (2020-09-06)
 
 ### Fix
