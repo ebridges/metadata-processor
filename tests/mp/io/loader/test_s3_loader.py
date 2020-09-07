@@ -50,7 +50,7 @@ def test_download_file_from_s3_not_found(mocker):
 
     key = 'mock_key'
     dest = 'mock_dest'
-    with raises(s3_loader.KeyNotFound):
+    with raises(s3_loader.KeyDownloadError):
         s3_loader.download_file_from_s3(key, dest)
     boto3.resource.assert_called_once()
     s3_object.Object.assert_called_with(MOCK_BUCKET_NAME, key)

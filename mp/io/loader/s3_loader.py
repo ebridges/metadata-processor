@@ -1,4 +1,4 @@
-from logging import info
+from logging import info, warning
 from os import environ
 
 import boto3
@@ -10,7 +10,7 @@ from mp import (
 )
 
 
-class KeyNotFound(Exception):
+class KeyDownloadError(Exception):
     def __init__(self, message):
         super().__init__(message)
 
@@ -33,7 +33,6 @@ def download_file_from_s3(key, dest, region=DEFAULT_REGION):
         s3_obj = s3.Object(bucket, key)
         s3_obj.download_file(dest)
         info(f'{key} downloaded to {dest}')
-    except Exception as e:  #  botocore.exceptions.ClientError
-        info(f'NOT FOUND: {bucket}/{key}: {e}')
-        if e.response.get('Error', {}).get('Code') == '404':
-            raise KeyNotFound(f'{bucket}/{key} not found')
+    except Exception as e:
+        warning(f'ERROR: {bucket}/{key}: {e}')
+        raise KeyDownloadError(f'{bucket}/{key} not found: {e}')
