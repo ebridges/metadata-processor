@@ -30,7 +30,7 @@ def download_file_from_s3(key, dest, region=DEFAULT_REGION):
     s3 = boto3.resource('s3', region_name=region)
 
     try:
-        s3_obj = s3.Object(bucket, key)
+        s3_obj = s3.Object(bucket, key.file_path)
         s3_obj.download_file(dest)
         info(f'{key} downloaded to {dest}')
     except Exception as e:

@@ -6,6 +6,7 @@ from pytest import raises
 
 from mp import SOURCE_BUCKET
 from mp.io.loader import s3_loader
+from mp.model.image_key import ImageKey
 from tests.mp import mock_event_keys
 
 MOCK_REGION_NAME = 'mock_region_name'
@@ -34,11 +35,11 @@ def test_key_exists_diff_region(mocker):
 
 def test_download_file_from_s3_normal_case(mocker):
     s3_object, s3_getter = setup_download_file_from_s3(mocker)
-    key = 'mock_key'
+    key = ImageKey.new()
     dest = 'mock_dest'
     s3_loader.download_file_from_s3(key, dest)
     boto3.resource.assert_called_once()
-    s3_object.Object.assert_called_with(MOCK_BUCKET_NAME, key)
+    s3_object.Object.assert_called_with(MOCK_BUCKET_NAME, key.file_path)
     s3_getter.download_file.assert_called_with(dest)
 
 
@@ -48,12 +49,12 @@ def test_download_file_from_s3_not_found(mocker):
     exception.response = {'Error': {'Code': '404'}}
     s3_getter.download_file.side_effect = exception
 
-    key = 'mock_key'
+    key = ImageKey.new()
     dest = 'mock_dest'
     with raises(s3_loader.KeyDownloadError):
         s3_loader.download_file_from_s3(key, dest)
     boto3.resource.assert_called_once()
-    s3_object.Object.assert_called_with(MOCK_BUCKET_NAME, key)
+    s3_object.Object.assert_called_with(MOCK_BUCKET_NAME, key.file_path)
     s3_getter.download_file.assert_called_with(dest)
 
 
