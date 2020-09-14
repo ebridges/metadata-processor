@@ -18,7 +18,6 @@ from mp.io.metadata_reader import (
     extract_gps_time,
     extract_metadata,
     extract_shutter_speed,
-    resolve_rational,
 )
 from mp.model import *
 from mp.io.metadata_tags import *
@@ -230,13 +229,6 @@ def test_extract_gps_degrees_missing():
     keys = ['bbb']
     expected = None
     actual = extract_gps_degrees(md, keys)
-    assert expected == actual
-
-
-def test_resolve_rational():
-    undertest = IFDRational(222, 444)
-    expected = (222, 444)
-    actual = resolve_rational(undertest)
     assert expected == actual
 
 

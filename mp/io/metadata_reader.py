@@ -94,7 +94,7 @@ def extract_focal_length(md):
     f = resolve_val(md, [TAG_PHOTO_FOCALLENGTHIN35MMFILM])
     r = resolve_val(md, [TAG_PHOTO_FOCALLENGTH])
     if f and r:
-        return (f'{f}mm',) + resolve_rational(r)
+        return f'{f}mm', r.numerator, r.denominator
     else:
         return (None, None, None)
 
@@ -180,10 +180,6 @@ def resolve_val(md, keys):
     for key in keys:
         if key in md:
             return md[key]
-
-
-def resolve_rational(v):
-    return (v.numerator, v.denominator) if v else (None, None)
 
 
 def apex_to_aperture(v):
