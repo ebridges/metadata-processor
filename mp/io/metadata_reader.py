@@ -135,7 +135,8 @@ def extract_gps_coords(md):
         if lon_ref != 'E':
             lon = 0 - lon
 
-    alt = resolve_val(gps_md, [TAG_GPSINFO_GPSALTITUDE])
+    v = resolve_val(gps_md, [TAG_GPSINFO_GPSALTITUDE])
+    alt = float(v) if v is not None else None
 
     return lat, lon, alt, dt
 
