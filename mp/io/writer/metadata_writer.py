@@ -1,4 +1,4 @@
-from logging import info, debug, error
+from logging import info, debug, warning
 from sys import stdout
 
 from mp.io.writer.connection_factory import ConnectionFactory
@@ -48,7 +48,7 @@ class DatabaseMetadataWriter(MetadataWriter):  # pragma: no cover
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.cursor.close()
         if exc_val is not None:
-            error(f'exception {exc_type} when closing db handle: {exc_val}')
+            warning(f'exception {exc_type} when closing db handle: {exc_val}')
             self.connection.rollback()
         else:
             self.connection.commit()
