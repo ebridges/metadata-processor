@@ -136,6 +136,19 @@ def test_extract_gps_coords_flip_coords():
     assert expected == actual
 
 
+def test_extract_gps_coords():
+    md = {
+        TAG_GPSINFO: {
+            TAG_GPSINFO_GPSALTITUDE: 0.0,
+            TAG_GPSINFO_GPSDATESTAMP: '2020:01:02',
+            TAG_GPSINFO_GPSTIMESTAMP: (3.0, 4.0, 5.0),
+        }
+    }
+    expected = (None, None, 0.0, datetime(2020, 1, 2, 3, 4, 5, tzinfo=timezone.utc))
+    actual = extract_gps_coords(md)
+    assert expected == actual
+
+
 def test_extract_focal_length():
     md = {
         TAG_PHOTO_FOCALLENGTHIN35MMFILM: '27',
