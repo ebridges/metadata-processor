@@ -1,3 +1,13 @@
+## v1.1.13 (2020-09-14)
+
+### Fix
+
+- test broken by previous change
+- add test to improve coverage, and simplify gps extraction logic
+- when altitude was not present was causing an exception when attempting to convert to a float
+- "error" level logging triggers an event in sentry, double counting errors
+- extension does not include a dot
+
 ## v1.1.12 (2020-09-07)
 
 ### Fix
