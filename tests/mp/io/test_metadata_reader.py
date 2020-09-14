@@ -228,7 +228,7 @@ def test_extract_gps_degrees():
 def test_extract_gps_degrees_missing():
     md = {'aaa': None, 'bbb': None}
     keys = ['bbb']
-    expected = 0
+    expected = None
     actual = extract_gps_degrees(md, keys)
     assert expected == actual
 
