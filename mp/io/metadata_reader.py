@@ -121,21 +121,25 @@ def extract_gps_coords(md):
     if not gps_md:
         return None, None, None, None
 
-    lat = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLATITUDE])
-    lat_ref = resolve_val(gps_md, [TAG_GPSINFO_GPSLATITUDEREF])
-    if lat_ref != 'N':
-        lat = 0 - lat
-
-    lon = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLONGITUDE])
-    lon_ref = resolve_val(gps_md, [TAG_GPSINFO_GPSLONGITUDEREF])
-    if lon_ref != 'E':
-        lon = 0 - lon
-
-    v = resolve_val(gps_md, [TAG_GPSINFO_GPSALTITUDE])
-
     dt = extract_gps_datetime(gps_md)
 
-    return lat, lon, float(v), dt
+    lat = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLATITUDE])
+    if lat != 0:
+        lat_ref = resolve_val(gps_md, [TAG_GPSINFO_GPSLATITUDEREF])
+        if lat_ref != 'N':
+            lat = 0 - lat
+
+    lon = extract_gps_degrees(gps_md, [TAG_GPSINFO_GPSLONGITUDE])
+    if lon != 0:
+        lon_ref = resolve_val(gps_md, [TAG_GPSINFO_GPSLONGITUDEREF])
+        if lon_ref != 'E':
+            lon = 0 - lon
+
+    if dt and lon != 0 and lat != 0:
+        alt = resolve_val(gps_md, [TAG_GPSINFO_GPSALTITUDE])
+        return lat, lon, alt, dt
+    else:
+        return None, None, None, None
 
 
 def extract_gps_degrees(md, keys):
