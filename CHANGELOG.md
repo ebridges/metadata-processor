@@ -1,3 +1,13 @@
+## v1.1.14 (2020-09-14)
+
+### Fix
+
+- test broken as "zero" renders as false, when it should only be false when None
+
+### Refactor
+
+- remove unnecessary function
+
 ## v1.1.13 (2020-09-14)
 
 ### Fix
