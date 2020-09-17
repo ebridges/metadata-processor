@@ -28,7 +28,7 @@ class FilehandleMetadataWriter(MetadataWriter):
             self.output.close()
 
     def write(self, metadata):
-        self.output.write(self.formatter(metadata))
+        self.output.write(self.formatter(metadata.dict()))
         self.output.flush()
         return None
 

@@ -2,7 +2,6 @@ from datetime import datetime
 from uuid import uuid4
 
 from mp.model.metadata import Metadata
-from mp.io.writer import formatter
 from mp.io.writer.formatter import (
     csv_formatter,
     txt_formatter,

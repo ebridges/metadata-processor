@@ -34,7 +34,7 @@ from mp.io.writer.metadata_writer import (
 )
 from mp.model.image_key import ImageKey
 from mp.model.metadata import Metadata
-from mp.io.writer.metadata_formatter import formatters
+from mp.io.writer.formatter import formatters
 from mp.util.tools import ImageKeyType, DatabaseUrlType, configure_logging
 
 
