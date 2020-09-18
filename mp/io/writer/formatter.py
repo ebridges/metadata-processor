@@ -32,7 +32,7 @@ def json_formatter(data):
         if isinstance(o, datetime):
             return o.isoformat()
 
-    if metadata:
+    if data:
         return dumps(data, indent=4, default=converter)
 
 
