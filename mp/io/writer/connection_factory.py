@@ -6,7 +6,7 @@ import psycopg2
 import sqlite3
 
 from mp.io.writer import POSTGRESQL, SQLITE
-from mp.io.writer.sql import create
+from mp.io.writer.metadata_sql import create as create_metadata_table
 
 
 class ConnectionFactory:
@@ -39,7 +39,7 @@ class SqliteConnectionFactory(ConnectionFactory):
 
         debug('Creating table if it does not exist')
         c = self.connection.cursor()
-        c.execute(create())
+        c.execute(create_metadata_table())
 
         return self.connection
 
