@@ -1,0 +1,2 @@
+POSTGRESQL = 'postgresql'
+SQLITE = 'sqlite'

@@ -5,7 +5,8 @@ from pathlib import Path
 import psycopg2
 import sqlite3
 
-from mp.io.writer.sql import create, POSTGRESQL, SQLITE
+from mp.io.writer import POSTGRESQL, SQLITE
+from mp.io.writer.sql import create
 
 
 class ConnectionFactory:

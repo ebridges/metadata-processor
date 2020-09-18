@@ -11,7 +11,7 @@ from mp.io.writer.metadata_writer import (
     DatabaseMetadataWriter,
     FilehandleMetadataWriter,
 )
-from mp.io.writer.sql import POSTGRESQL, SQLITE
+from mp.io.writer import POSTGRESQL, SQLITE
 from tests.mp.io.writer.mock_metadata_formatter import mock_formatter
 from tests.mp.model.mock_metadata import MockMetadata
 from tests.mp.io.writer.mock_metadata_writer import MockDatabaseMetadataWriter

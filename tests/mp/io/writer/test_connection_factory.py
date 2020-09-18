@@ -5,7 +5,7 @@ from mp.io.writer.connection_factory import (
     SqliteConnectionFactory,
     PostgresqlConnectionFactory,
 )
-from mp.io.writer.sql import POSTGRESQL, SQLITE
+from mp.io.writer import POSTGRESQL, SQLITE
 
 
 def test_instanceof_sqlite():

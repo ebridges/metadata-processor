@@ -1,9 +1,9 @@
 from logging import info, debug
-from mp import model
 from types import ModuleType
 
-POSTGRESQL = 'postgresql'
-SQLITE = 'sqlite'
+from mp import model
+from mp.io.writer import POSTGRESQL, SQLITE
+
 
 table_name = 'media_item'
 
