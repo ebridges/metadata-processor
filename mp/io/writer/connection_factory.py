@@ -5,8 +5,13 @@ from pathlib import Path
 import psycopg2
 import duckdb
 
+<<<<<<< HEAD
 from mp.io.writer import DUCKDB, POSTGRESQL
 from mp.io.writer.sql import create
+=======
+from mp.io.writer import POSTGRESQL, SQLITE
+from mp.io.writer.metadata_sql import create as create_metadata_table
+>>>>>>> 63b72ae... refactor: identify sql as specific to metadata table
 
 
 class ConnectionFactory:
@@ -39,7 +44,11 @@ class DuckdbConnectionFactory(ConnectionFactory):
 
         debug('Creating table if it does not exist')
         c = self.connection.cursor()
+<<<<<<< HEAD
         c.execute(create(DUCKDB))
+=======
+        c.execute(create_metadata_table())
+>>>>>>> 63b72ae... refactor: identify sql as specific to metadata table
 
         return self.connection
 
