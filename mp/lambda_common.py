@@ -1,7 +1,9 @@
 from json import dumps
-from logging import debug, info, warning
+from logging import debug, info, warning, error
 from os import environ
 from tempfile import NamedTemporaryFile
+from traceback import TracebackException
+from uuid import uuid4
 
 import sentry_sdk
 from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
@@ -86,6 +88,12 @@ def connection_factory():  # pragma: no cover
     return ConnectionFactory.instance(url)
 
 
+def init_exception_writer() -> ExceptionEventWriter:  # pragma: no cover
+    debug('init_exception_writer called')
+    conn_factory = connection_factory()
+    return DatabaseExceptionEventWriter(conn_factory)
+
+
 def init_metadata_writer() -> MetadataWriter:  # pragma: no cover
     debug('init_metadata_writer called')
     conn_factory = connection_factory()
@@ -111,3 +119,18 @@ def generate_json_response(message, sc=200):
         'headers': {'content-type': 'text/json'},
         'body': dumps(mesg),
     }
+
+
+def write_exception_event(writer, image_key, exception):
+    error(f'Received exception when processing {image_key}: {exception.__name__}')
+    tb = ''.join(TracebackException.from_exception(exception[0]).format())
+    event = {
+        'id': uuid4(),
+        'owner': image_key.owner_id,
+        'file_path': image_key.file_path,
+        'error_code': exception.__name__,
+        'message': ' '.join(exception.args),
+        'reason': tb,
+        'original_file_path': None,
+    }
+    writer.write(event)
