@@ -1,5 +1,5 @@
 [run]
-omit = tests/*, mp/__init__.py, mp/util/objects.py, mp/io/writer/metadata_sql.py
+omit = tests/*, mp/__init__.py, mp/util/objects.py, mp/io/writer/metadata_sql.py, mp/io/writer/exception_sql.py
 
 [coverage:report]
 skip_empty = true
