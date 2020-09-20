@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 import sentry_sdk
 
@@ -54,25 +55,32 @@ def s3_handler(event, scope, context={}, force_update=False):
     keys = lambda_common.extract_image_keys_from_s3_event(event)
 
     writer = lambda_common.init_metadata_writer()
+    x_cnt = 0
     for key in keys:
-        scope.set_tag('image_key', key.file_path)
-        scope.set_tag('owner_id', key.owner_id)
-        scope.set_tag('image_id', key.image_id)
+        try:
+            scope.set_tag('image_key', key.file_path)
+            scope.set_tag('owner_id', key.owner_id)
+            scope.set_tag('image_id', key.image_id)
 
-        if not s3_loader.key_exists(key.file_path):
-            bucket = os.environ.get(SOURCE_BUCKET)
-            logging.info(f'NOT FOUND: {key} not found in bucket: {bucket}.')
-            continue
+            if not s3_loader.key_exists(key.file_path):
+                bucket = os.environ.get(SOURCE_BUCKET)
+                logging.info(f'NOT FOUND: {key} not found in bucket: {bucket}.')
+                continue
 
-        with writer:
-            exists_in_db = writer.exists(key.file_path)
-            logging.info(f'Data in db {exists_in_db}, force: {force_update}')
-            if not exists_in_db or (exists_in_db and force_update):
-                logging.info(f'Extracting and writing metadata to db for {key}')
-                result = lambda_common.write_metadata(writer, key)
-                if result:
-                    logging.info(f'result: {result}')
-    logging.info(f'OK: Processing of {len(keys)} record(s) completed')
+            with writer:
+                exists_in_db = writer.exists(key.file_path)
+                logging.info(f'Data in db {exists_in_db}, force: {force_update}')
+                if not exists_in_db or (exists_in_db and force_update):
+                    logging.info(f'Extracting and writing metadata to db for {key}')
+                    result = lambda_common.write_metadata(writer, key)
+                    if result:
+                        logging.info(f'result: {result}')
+        except:
+            x_cnt = x_cnt + 1
+            x_writer = lambda_common.init_exception_writer()
+            lambda_common.write_exception_event(x_writer, key, sys.exc_info())
+    sz = len(keys)
+    logging.info(f'OK: Processing of {sz} record(s) completed with {x_cnt} errors')
 
 
 def api_handler(event, scope, context={}, force_update=False):
