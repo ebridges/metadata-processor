@@ -53,7 +53,7 @@ def s3_handler(event, scope, context={}, force_update=False):
     logging.debug('s3_handler called.')
     keys = lambda_common.extract_image_keys_from_s3_event(event)
 
-    writer = lambda_common.init_writer()
+    writer = lambda_common.init_metadata_writer()
     for key in keys:
         scope.set_tag('image_key', key.file_path)
         scope.set_tag('owner_id', key.owner_id)
@@ -91,7 +91,7 @@ def api_handler(event, scope, context={}, force_update=False):
         logging.info(f'key does not exist {key}')
         return lambda_common.generate_json_response(f'{key} not found.', sc=404)
 
-    writer = lambda_common.init_writer()
+    writer = lambda_common.init_metadata_writer()
     with writer:
         exists_in_db = writer.exists(key.file_path)
         if not exists_in_db or (exists_in_db and force_update):

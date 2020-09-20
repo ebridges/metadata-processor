@@ -274,7 +274,7 @@ def _handler_run(
     mock_writer = MagicMock()
     mock_writer.exists = MagicMock(return_value=exists_in_db)
     mocker.patch.object(
-        lambda_common, 'init_writer', MagicMock(return_value=mock_writer)
+        lambda_common, 'init_metadata_writer', MagicMock(return_value=mock_writer)
     )
     mocker.patch.object(s3_loader, 'key_exists', MagicMock(return_value=exists_in_s3))
     mocker.patch.object(lambda_common, 'write_metadata')
@@ -288,7 +288,7 @@ def _handler_run(
     assert mock_scope.set_tag.call_count == 3 * event_cnt
     assert s3_loader.key_exists.call_count == event_cnt
     if exists_in_s3:
-        assert lambda_common.init_writer.call_count == 1
+        assert lambda_common.init_metadata_writer.call_count == 1
         assert mock_writer.exists.call_count == event_cnt
         assert lambda_common.write_metadata.call_count == event_write_cnt
 

@@ -16,10 +16,14 @@ from mp import (
 from mp.model.image_key import ImageKey
 from mp.io.loader.s3_loader import download_file_from_s3
 from mp.io.metadata_reader import extract_metadata
+from mp.io.writer.connection_factory import ConnectionFactory
 from mp.io.writer.metadata_writer import (
     MetadataWriter,
     DatabaseMetadataWriter,
-    ConnectionFactory,
+)
+from mp.io.writer.exception_writer import (
+    ExceptionEventWriter,
+    DatabaseExceptionEventWriter,
 )
 from mp.util.tools import parse_db_url
 
@@ -76,11 +80,15 @@ def init_monitoring() -> None:  # pragma: no cover
     info(f'Monitoring configured with DSN: {dsn}')
 
 
-def init_writer() -> MetadataWriter:  # pragma: no cover
-    debug('init_writer called')
+def connection_factory():  # pragma: no cover
     u = environ.get(DATABASE_URL)
     url = parse_db_url(u)
-    conn_factory = ConnectionFactory.instance(url)
+    return ConnectionFactory.instance(url)
+
+
+def init_metadata_writer() -> MetadataWriter:  # pragma: no cover
+    debug('init_metadata_writer called')
+    conn_factory = connection_factory()
     return DatabaseMetadataWriter(conn_factory)
 
 
