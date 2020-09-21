@@ -11,7 +11,7 @@ from mp.io.writer.metadata_writer import (
     DatabaseMetadataWriter,
     FilehandleMetadataWriter,
 )
-from mp.io.writer.sql import POSTGRESQL, SQLITE
+from mp.io.writer import POSTGRESQL, DUCKDB
 from tests.mp.io.writer.mock_metadata_formatter import mock_formatter
 from tests.mp.model.mock_metadata import MockMetadata
 from tests.mp.io.writer.mock_metadata_writer import MockDatabaseMetadataWriter
@@ -45,13 +45,13 @@ def test_file_metadatawriter():
         assert mock_formatter == under_test.formatter
 
 
-def test_db_metadatawriter_init_sqlite():
+def test_db_metadatawriter_init_duckdb():
     connection_factory = MockConnectionFactory.instance(
-        db={'dbtype': SQLITE, 'url': 'foobar'}
+        db={'dbtype': DUCKDB, 'url': 'foobar'}
     )
     under_test = DatabaseMetadataWriter(connection_factory)
     assert under_test.connection_factory is not None
-    assert under_test.type == SQLITE
+    assert under_test.type == DUCKDB
 
 
 def test_db_metadatawriter_init_random():
