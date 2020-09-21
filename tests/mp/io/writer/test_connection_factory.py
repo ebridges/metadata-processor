@@ -2,16 +2,16 @@ from sys import platform
 from pytest import raises, mark
 from mp.io.writer.connection_factory import (
     ConnectionFactory,
-    SqliteConnectionFactory,
+    DuckdbConnectionFactory,
     PostgresqlConnectionFactory,
 )
-from mp.io.writer import POSTGRESQL, SQLITE
+from mp.io.writer import POSTGRESQL, DUCKDB
 
 
-def test_instanceof_sqlite():
-    db = {'dbtype': SQLITE, 'url': 'foobar', 'dbname': 'test-db'}
+def test_instanceof_duckdb():
+    db = {'dbtype': DUCKDB, 'url': 'foobar', 'dbname': 'test-db'}
     under_test = ConnectionFactory.instance(db)
-    assert isinstance(under_test, SqliteConnectionFactory)
+    assert isinstance(under_test, DuckdbConnectionFactory)
     assert under_test.dbinfo == db
     assert under_test.connect() is not None
 
