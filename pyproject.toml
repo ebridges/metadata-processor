@@ -23,6 +23,7 @@ assertpy = "^1.1"
 boto3 = "^1.14.43"
 pytest-mock = "^3.3.0"
 lgw = "^1.2.2"
+duckdb = "^0.2.1"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
