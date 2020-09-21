@@ -1,2 +1,2 @@
 POSTGRESQL = 'postgresql'
-SQLITE = 'sqlite'
+DUCKDB = 'duckdb'
