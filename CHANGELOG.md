@@ -1,3 +1,10 @@
+## v1.2.0 (2020-09-21)
+
+### Feat
+
+- eliminate duplication of sql for sqlite.
+- serve up duckdb connections as replacement for sqlite connections
+
 ## v1.1.14 (2020-09-14)
 
 ### Fix
