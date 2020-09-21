@@ -3,22 +3,22 @@ from assertpy import assert_that
 
 from mp.util.tools import DatabaseUrlType
 
-sqlite_testdata = [
-    ('sqlite:foo/bar', 'foo/bar'),
-    ('sqlite:/foo/bar', 'foo/bar'),
-    ('sqlite:///foo/bar', 'foo/bar'),
-    ('sqlite:////foo/bar', '/foo/bar'),
-    ('sqlite::memory:', ':memory:'),
+duckdb_testdata = [
+    ('duckdb:foo/bar', 'foo/bar'),
+    ('duckdb:/foo/bar', 'foo/bar'),
+    ('duckdb:///foo/bar', 'foo/bar'),
+    ('duckdb:////foo/bar', '/foo/bar'),
+    ('duckdb::memory:', ':memory:'),
 ]
 
 
-@pytest.mark.parametrize('input,expected', sqlite_testdata)
-def test_parse_sqlite_url(input, expected):
+@pytest.mark.parametrize('input,expected', duckdb_testdata)
+def test_parse_duckdb_url(input, expected):
     under_test = DatabaseUrlType()
     actual = under_test.convert(input, None, None)
     assert expected == actual['dbname']
     assert input == actual['url']
-    assert 'sqlite' == actual['dbtype']
+    assert 'duckdb' == actual['dbtype']
     assert actual['hostname'] is None
     assert actual['port'] is None
     assert actual['username'] is None

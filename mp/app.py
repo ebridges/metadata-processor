@@ -9,7 +9,7 @@ Options:
   -d, --db-url DB-URL          Connect information for database to write
                                metadata. Example:
                                postgresql://user:pass@host:port/database
-                               sqlite:path/to/dbfile
+                               duckdb:path/to/dbfile
 
   -f, --format [csv|txt|json]  Format of metadata when written to file or to
                                stdout.  [default: txt]
@@ -67,7 +67,7 @@ format_types = formatters.keys()
     required=False,
     type=DatabaseUrlType(),
     envvar=connection_url_envvar,
-    help='Connect information for database to write metadata. Example: postgresql://user:pass@host:port/database sqlite:path/to/dbfile',
+    help='Connect information for database to write metadata. Example: postgresql://user:pass@host:port/database duckdb:path/to/dbfile',
 )
 @option(
     '-f',
