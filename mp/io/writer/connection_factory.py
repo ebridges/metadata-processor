@@ -39,7 +39,7 @@ class DuckdbConnectionFactory(ConnectionFactory):
 
         debug('Creating table if it does not exist')
         c = self.connection.cursor()
-        c.execute(create_metadata_table(DUCKDB))
+        c.execute(create_metadata_table())
 
         return self.connection
 
