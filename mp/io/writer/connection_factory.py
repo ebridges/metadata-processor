@@ -6,7 +6,7 @@ import psycopg2
 import duckdb
 
 from mp.io.writer import DUCKDB, POSTGRESQL
-from mp.io.writer.metadata_sql import create
+from mp.io.writer.metadata_sql import create as create_metadata_table
 
 
 class ConnectionFactory:
@@ -39,7 +39,7 @@ class DuckdbConnectionFactory(ConnectionFactory):
 
         debug('Creating table if it does not exist')
         c = self.connection.cursor()
-        c.execute(create(DUCKDB))
+        c.execute(create_metadata_table(DUCKDB))
 
         return self.connection
 
