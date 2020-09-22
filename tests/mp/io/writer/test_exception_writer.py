@@ -4,7 +4,7 @@ from uuid import uuid4
 from unittest.mock import patch
 from pytest import raises
 
-from mp.io.writer import POSTGRESQL, SQLITE
+from mp.io.writer import POSTGRESQL, DUCKDB
 from mp.io.writer.exception_writer import (
     StdoutExceptionEventWriter,
     DatabaseExceptionEventWriter,
@@ -25,13 +25,13 @@ def test_stdout_exceptionwriter():
         assert mock_stdout == under_test.output
 
 
-def test_db_exceptionwriter_init_sqlite():
+def test_db_exceptionwriter_init_duckdb():
     connection_factory = MockConnectionFactory.instance(
-        db={'dbtype': SQLITE, 'url': 'foobar'}
+        db={'dbtype': DUCKDB, 'url': 'foobar'}
     )
     under_test = DatabaseExceptionEventWriter(connection_factory)
     assert under_test.connection_factory is not None
-    assert under_test.type == SQLITE
+    assert under_test.type == DUCKDB
 
 
 def test_db_exceptionwriter_init_random():

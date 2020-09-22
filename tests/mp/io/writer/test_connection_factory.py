@@ -5,11 +5,7 @@ from mp.io.writer.connection_factory import (
     DuckdbConnectionFactory,
     PostgresqlConnectionFactory,
 )
-<<<<<<< HEAD
 from mp.io.writer import POSTGRESQL, DUCKDB
-=======
-from mp.io.writer import POSTGRESQL, SQLITE
->>>>>>> c1a733f... refactor: move db types to a common location
 
 
 def test_instanceof_duckdb():

@@ -1,6 +1,8 @@
 from logging import info, debug
 from types import ModuleType
 
+from mp import model
+
 table_name = 'media_item'
 
 _columns = [
