@@ -50,10 +50,9 @@ def test_get_event_type_unrecognized():
 def test_handler_s3_normal_case(mocker):
     mock_event = s3_put_single_event_sample
     force_update_retval = False
-    trigger_error = True
     event_type = 's3'
-    mock_env = {TRIGGER_ERROR: trigger_error}
-    setup_handler(mocker, force_update_retval, trigger_error, event_type)
+    mock_env = {TRIGGER_ERROR: True}
+    setup_handler(mocker, force_update_retval, event_type)
 
     lambda_handler.handler(mock_event)
 
@@ -63,9 +62,8 @@ def test_handler_s3_normal_case(mocker):
 def test_handler_apig_normal_case(mocker):
     mock_event = s3_put_single_event_sample
     force_update_retval = False
-    trigger_error = True
     event_type = 'api'
-    setup_handler(mocker, force_update_retval, trigger_error, event_type)
+    setup_handler(mocker, force_update_retval, event_type)
 
     lambda_handler.handler(mock_event)
 
@@ -75,10 +73,9 @@ def test_handler_apig_normal_case(mocker):
 def test_handler_s3_trigger_error(mocker):
     mock_event = s3_put_single_event_sample
     force_update_retval = False
-    trigger_error = 'true'
     event_type = 's3'
-    env = {TRIGGER_ERROR: trigger_error}
-    setup_handler(mocker, force_update_retval, trigger_error, event_type, mock_env=env)
+    env = {TRIGGER_ERROR: 'true'}
+    setup_handler(mocker, force_update_retval, event_type, mock_env=env)
 
     with raises(Exception):
         lambda_handler.handler(mock_event)
@@ -87,9 +84,8 @@ def test_handler_s3_trigger_error(mocker):
 def test_handler_unrecognized_event_type(mocker):
     mock_event = {}
     force_update_retval = False
-    trigger_error = 'true'
     event_type = 'foobar'
-    setup_handler(mocker, force_update_retval, trigger_error, event_type)
+    setup_handler(mocker, force_update_retval, event_type)
 
     with raises(Exception):
         lambda_handler.handler(mock_event)
@@ -295,7 +291,7 @@ def _handler_run(
     return response
 
 
-def setup_handler(mocker, force_update_retval, trigger_error, event_type, mock_env={}):
+def setup_handler(mocker, force_update_retval, event_type, mock_env={}):
     mocker.patch.object(tools, 'configure_logging')
     mocker.patch.object(logging, 'info')
     mocker.patch.object(logging, 'debug')
