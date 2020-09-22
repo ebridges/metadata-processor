@@ -122,15 +122,17 @@ def generate_json_response(message, sc=200):
 
 
 def write_exception_event(writer, image_key, exception):
-    error(f'Received exception when processing {image_key}: {exception.__name__}')
-    tb = ''.join(TracebackException.from_exception(exception[0]).format())
+    exc = exception[0]
+    type_name = type(exc).__name__
+    error(f'Received exception when processing {image_key}: {type_name}')
+    tb = ''.join(TracebackException.from_exception(exc).format())
     event = {
         'id': uuid4(),
         'owner': image_key.owner_id,
         'file_path': image_key.file_path,
-        'error_code': exception.__name__,
-        'message': ' '.join(exception.args),
+        'error_code': type_name,
+        'message': ' '.join(exc.args),
         'reason': tb,
         'original_file_path': None,
     }
-    writer.write(event)
+    return writer.write(event)
