@@ -276,7 +276,7 @@ def _handler_run(
     mocker.patch.object(lambda_common, 'write_metadata')
     mock_scope = MagicMock()
 
-    if not mock_env:
+    if mock_env:
         mocker.patch.dict(os.environ, mock_env)
 
     response = handler(mock_event, mock_scope, force_update=force_update)
