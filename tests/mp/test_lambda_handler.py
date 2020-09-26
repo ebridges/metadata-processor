@@ -18,7 +18,7 @@ from tests.mp import (
     s3_put_multiple_event_sample,
     mock_event_keys,
 )
-
+from tests.mp.io.writer.mock_metadata_writer import MockDatabaseMetadataWriter
 
 def test_get_event_type_s3():
     expected = 's3'
@@ -264,16 +264,18 @@ def _handler_run(
     event_cnt=1,
     event_write_cnt=None,
     mock_env={},
+    mock_exceptions={},
 ):
     if event_write_cnt is None:
         event_write_cnt = event_cnt
-    mock_writer = MagicMock()
-    mock_writer.exists = MagicMock(return_value=exists_in_db)
-    mocker.patch.object(
-        lambda_common, 'init_metadata_writer', MagicMock(return_value=mock_writer)
-    )
+
+    mock_writer = MockDatabaseMetadataWriter(exists_retval=exists_in_db, side_effects=mock_exceptions)
+    mocker.patch.object(lambda_common, 'init_metadata_writer', MagicMock(return_value=mock_writer))
+
     mocker.patch.object(s3_loader, 'key_exists', MagicMock(return_value=exists_in_s3))
+
     mocker.patch.object(lambda_common, 'write_metadata')
+
     mock_scope = MagicMock()
 
     if mock_env:
@@ -285,7 +287,7 @@ def _handler_run(
     assert s3_loader.key_exists.call_count == event_cnt
     if exists_in_s3:
         assert lambda_common.init_metadata_writer.call_count == 1
-        assert mock_writer.exists.call_count == event_cnt
+        assert mock_writer.exists_count == event_cnt
         assert lambda_common.write_metadata.call_count == event_write_cnt
 
     return response
