@@ -1,4 +1,5 @@
 from copy import deepcopy
+from sys import exc_info
 
 from unittest.mock import patch
 from pytest import raises
@@ -120,7 +121,10 @@ def test_write_exception_event_normal_case():
     mock_image_id = 'ea38d6b0-fce9-11ea-b2da-6f3405d59931'
     image_key = ImageKey(f'{mock_owner_id}/{mock_image_id}.jpg')
     mock_writer = MockDatabaseExceptionEventWriter(insert_retval=mock_image_id)
-    mock_exception = [ValueError('aaa', 'bbb', 'ccc')]
-    actual_image_id = write_exception_event(mock_writer, image_key, mock_exception)
+    mock_exception = ValueError('aaa', 'bbb', 'ccc')
+    try:
+        raise mock_exception
+    except ValueError:
+        actual_image_id = write_exception_event(mock_writer, image_key, exc_info())
     assert actual_image_id == mock_image_id
     assert mock_writer.insert_count == 1

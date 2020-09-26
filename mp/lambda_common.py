@@ -2,7 +2,7 @@ from json import dumps
 from logging import debug, info, warning, error
 from os import environ
 from tempfile import NamedTemporaryFile
-from traceback import TracebackException
+from traceback import format_tb
 from uuid import uuid4
 
 import sentry_sdk
@@ -123,15 +123,15 @@ def generate_json_response(message, sc=200):
 
 def write_exception_event(writer, image_key, exception):
     exc = exception[0]
-    type_name = type(exc).__name__
+    type_name = exc.__name__
     error(f'Received exception when processing {image_key}: {type_name}')
-    tb = ''.join(TracebackException.from_exception(exc).format())
+    tb = '\n'.join(format_tb(exception[2]))
     event = {
         'id': uuid4(),
         'owner': image_key.owner_id,
         'file_path': image_key.file_path,
         'error_code': type_name,
-        'message': ' '.join(exc.args),
+        'message': ' '.join(exception[1].args),
         'reason': tb,
         'original_file_path': None,
     }
