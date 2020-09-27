@@ -23,7 +23,7 @@ def handler(event, context={}):
         logging.info(f'Scope {scope} configured.')
         scope.set_extra('processor_event', event)
         scope.set_tag('force_update', force_update)
-
+    
         if os.environ.get(TRIGGER_ERROR):
             scope.set_tag(TRIGGER_ERROR, os.environ.get(TRIGGER_ERROR))
             raise Exception('test event')

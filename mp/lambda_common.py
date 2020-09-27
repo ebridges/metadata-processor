@@ -53,7 +53,7 @@ def extract_image_keys_from_s3_event(event: object) -> [ImageKey]:
 
 def check_force_update(event: object) -> bool:
     debug('check_force_update called')
-    if FORCE_UPDATE in environ:
+    if FORCE_UPDATE in environ:  # pragma: no cover
         return True
     if not event:
         return None

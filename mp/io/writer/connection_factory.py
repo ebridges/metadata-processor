@@ -30,7 +30,7 @@ class ConnectionFactory:
 class DuckdbConnectionFactory(ConnectionFactory):
     def connect(self):
         dbname = self.dbinfo.get('dbname')
-        if dbname and '/' in dbname:
+        if dbname and '/' in dbname:  # pragma: no cover
             data_path = Path(dbname).parent
             info(f'Creating parent folders for db file: {data_path}')
             makedirs(data_path, exist_ok=True)
