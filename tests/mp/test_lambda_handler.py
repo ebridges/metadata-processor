@@ -125,7 +125,7 @@ def test_api_handler_single_image_not_found(mocker):
         exists_in_db,
         event_write_cnt=0,
         sc=404,
-        mock_env={SOURCE_BUCKET, 'foobar'},
+        mock_env={SOURCE_BUCKET: 'foobar'},
     )
 
 
@@ -162,7 +162,7 @@ def test_s3_handler_single_image_not_found(mocker):
         exists_in_s3,
         exists_in_db,
         event_write_cnt=0,
-        mock_env={SOURCE_BUCKET, 'foobar'},
+        mock_env={SOURCE_BUCKET: 'foobar'},
     )
 
 
