@@ -36,6 +36,13 @@ class DatabaseUrlType(click.ParamType):
 
 def parse_db_url(value):
     u = urlparse(value)
+
+    if not u.scheme:
+        raise ValueError('URL scheme is required.')
+
+    if not u.path:
+        raise ValueError('URL path is required.')
+
     path = u.path if not u.path.startswith('/') else u.path[1:]
     return {
         'url': value,
