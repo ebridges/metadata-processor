@@ -136,6 +136,14 @@ def test_s3_handler_single_normal_case(mocker):
     _s3_handler_single(mocker, force_update, exists_in_s3, exists_in_db)
 
 
+def test_s3_handler_single_exception(mocker):
+    force_update = False
+    exists_in_s3 = True
+    exists_in_db = False
+    exception_thrown = ValueError('Boom!')
+    _s3_handler_single(mocker, force_update, exists_in_s3, exists_in_db, mock_exception=exception_thrown)
+
+
 def test_s3_handler_single_force_update(mocker):
     force_update = True
     exists_in_s3 = True
@@ -239,7 +247,7 @@ def _s3_handler_multi(
 
 
 def _s3_handler_single(
-    mocker, force_update, exists_in_s3, exists_in_db, event_write_cnt=None, mock_env={}
+    mocker, force_update, exists_in_s3, exists_in_db, event_write_cnt=None, mock_env={}, mock_exception=None
 ):
     mock_event = deepcopy(s3_put_single_event_sample)
     _handler_run(
@@ -251,6 +259,7 @@ def _s3_handler_single(
         mock_event,
         event_write_cnt=event_write_cnt,
         mock_env=mock_env,
+        mock_exception=mock_exception,
     )
 
 
@@ -264,22 +273,29 @@ def _handler_run(
     event_cnt=1,
     event_write_cnt=None,
     mock_env={},
-    mock_exceptions={},
+    mock_exception=None,
 ):
     if event_write_cnt is None:
         event_write_cnt = event_cnt
 
-    mock_writer = MockDatabaseMetadataWriter(exists_retval=exists_in_db, side_effects=mock_exceptions)
+    mock_writer = MockDatabaseMetadataWriter(exists_retval=exists_in_db)
     mocker.patch.object(lambda_common, 'init_metadata_writer', MagicMock(return_value=mock_writer))
 
     mocker.patch.object(s3_loader, 'key_exists', MagicMock(return_value=exists_in_s3))
 
-    mocker.patch.object(lambda_common, 'write_metadata')
+    if mock_exception:
+        mock_write_metadata = MagicMock(side_effect=mock_exception)
+        mocker.patch.object(lambda_common, 'init_exception_writer')
+        mocker.patch.object(lambda_common, 'write_exception_event')
+    else:
+        mock_write_metadata = MagicMock()
+
+    mocker.patch.object(lambda_common, 'write_metadata', mock_write_metadata)
 
     mock_scope = MagicMock()
 
     if mock_env:
-        mocker.patch.dict(os.environ, mock_env)
+        mocker.patch.dict(os.environ, mock_env, clear=True)
 
     response = handler(mock_event, mock_scope, force_update=force_update)
 
@@ -289,6 +305,10 @@ def _handler_run(
         assert lambda_common.init_metadata_writer.call_count == 1
         assert mock_writer.exists_count == event_cnt
         assert lambda_common.write_metadata.call_count == event_write_cnt
+
+    if mock_exception:
+        assert lambda_common.init_exception_writer.call_count == 1
+        assert lambda_common.write_exception_event.call_count == 1
 
     return response
 
