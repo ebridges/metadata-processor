@@ -31,7 +31,7 @@ def extract_metadata(image_key, image_file):
             warning(f'No create date in EXIF metadata of {image_key}, using XMP.')
             cd = extract_createdate_xmp(img, image_key)
         if not cd:
-            raise ValueError(f'unable to read create date from {image_file}')
+            raise ValueError(f'unable to read create date for {image_key}')
         debug(f'Found create date {cd} for image {image_key}')
         md[CREATE_DATE] = cd
 
@@ -86,7 +86,7 @@ def extract_createdate_xmp(image, image_key):
                     # it to conform with EXIF create dates, which do
                     # not include it
                     return parse_date(date[0])
-            except Exception as e:
+            except Exception as e:  # pragma: no cover
                 warning(f'Exception with image [{image_key}] parsing XMP XML: {e}')
 
 

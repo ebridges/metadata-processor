@@ -2,7 +2,7 @@ from logging import info, debug, warning
 from sys import stdout
 
 from mp.io.writer.connection_factory import ConnectionFactory
-from mp.io.writer.sql import insert, exists, update, delete
+from mp.io.writer.metadata_sql import insert, exists, update, delete
 from mp.model import FILE_PATH, IMAGE_ID
 
 
@@ -28,7 +28,7 @@ class FilehandleMetadataWriter(MetadataWriter):
             self.output.close()
 
     def write(self, metadata):
-        self.output.write(self.formatter(metadata))
+        self.output.write(self.formatter(metadata.dict()))
         self.output.flush()
         return None
 

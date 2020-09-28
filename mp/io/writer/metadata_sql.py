@@ -1,6 +1,7 @@
 from logging import info, debug
-from mp import model
 from types import ModuleType
+
+from mp import model
 
 table_name = 'media_item'
 
@@ -40,7 +41,7 @@ _sql_types = {
 }
 
 
-def create(dbtype):
+def create(dbtype=DUCKDB):
     if dbtype == DUCKDB:
         # some data types not yet supported by duckdb
         _sql_types[model.IMAGE_ID] = 'varchar primary key'

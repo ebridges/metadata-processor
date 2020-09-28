@@ -2,8 +2,8 @@ from datetime import datetime
 from uuid import uuid4
 
 from mp.model.metadata import Metadata
-from mp.io.writer import metadata_formatter
-from mp.io.writer.metadata_formatter import (
+from mp.io.writer import formatter
+from mp.io.writer.formatter import (
     csv_formatter,
     txt_formatter,
     json_formatter,
@@ -57,7 +57,7 @@ def test_json_formatter_with_conversions():
         expected_date,
         expected_date_id,
     )
-    actual = json_formatter(md)
+    actual = json_formatter(md.dict())
     assert expected == actual
 
 
@@ -89,7 +89,7 @@ def test_json_formatter_no_keys():
     "gps_date_time": null,
     "artist": null
 }'''
-    actual = json_formatter(md)
+    actual = json_formatter(md.dict())
     assert expected == actual
 
 
@@ -121,7 +121,7 @@ def test_json_formatter_one_key():
     "gps_date_time": null,
     "artist": null
 }'''
-    actual = json_formatter(md)
+    actual = json_formatter(md.dict())
     assert expected == actual
 
 
@@ -153,7 +153,7 @@ def test_json_formatter_two_keys():
     "gps_date_time": null,
     "artist": "yyy"
 }'''
-    actual = json_formatter(md)
+    actual = json_formatter(md.dict())
     assert expected == actual
 
 
@@ -185,7 +185,7 @@ def test_json_formatter_one_key_none_val():
     "gps_date_time": null,
     "artist": null
 }'''
-    actual = json_formatter(md)
+    actual = json_formatter(md.dict())
     assert expected == actual
 
 
@@ -217,7 +217,7 @@ def test_json_formatter_two_keys_empty_vals():
     "gps_date_time": null,
     "artist": null
 }'''
-    actual = json_formatter(md)
+    actual = json_formatter(md.dict())
     assert expected == actual
 
 
@@ -233,7 +233,7 @@ def test_csv_formatter_no_keys():
     expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
 ,,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,,,,0
 '''
-    actual = csv_formatter(md)
+    actual = csv_formatter(md.dict())
     assert expected == actual
 
 
@@ -242,7 +242,7 @@ def test_csv_formatter_one_key():
     expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
 ,,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,bbb,,,0
 '''
-    actual = csv_formatter(md)
+    actual = csv_formatter(md.dict())
     assert expected == actual
 
 
@@ -251,7 +251,7 @@ def test_csv_formatter_two_keys():
     expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
 ,yyy,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,bbb,,,0
 '''
-    actual = csv_formatter(md)
+    actual = csv_formatter(md.dict())
     assert expected == actual
 
 
@@ -260,7 +260,7 @@ def test_csv_formatter_one_key_none_val():
     expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
 ,,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,,,,0
 '''
-    actual = csv_formatter(md)
+    actual = csv_formatter(md.dict())
     assert expected == actual
 
 
@@ -269,7 +269,7 @@ def test_csv_formatter_two_keys_empty_vals():
     expected = '''aperture,artist,camera_make,camera_model,create_date,create_day_id,file_path,file_size,focal_length,focal_length_denominator,focal_length_numerator,gps_alt,gps_date_time,gps_lat,gps_lon,id,image_height,image_width,iso_speed,mime_type,owner_id,shutter_speed,shutter_speed_denominator,shutter_speed_numerator
 ,,,,,0,,0,,,0,0,,0,0,,0,0,,image/jpeg,,,,0
 '''
-    actual = csv_formatter(md)
+    actual = csv_formatter(md.dict())
     assert expected == actual
 
 
@@ -307,7 +307,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = txt_formatter(md)
+    actual = txt_formatter(md.dict())
     assert expected == actual
 
 
@@ -338,7 +338,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = txt_formatter(md)
+    actual = txt_formatter(md.dict())
     assert expected == actual
 
 
@@ -369,7 +369,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = txt_formatter(md)
+    actual = txt_formatter(md.dict())
     assert expected == actual
 
 
@@ -400,7 +400,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = txt_formatter(md)
+    actual = txt_formatter(md.dict())
     assert expected == actual
 
 
@@ -431,7 +431,7 @@ shutter_speed=None
 shutter_speed_denominator=None
 shutter_speed_numerator=0
 '''
-    actual = txt_formatter(md)
+    actual = txt_formatter(md.dict())
     assert expected == actual
 
 
@@ -440,4 +440,4 @@ def test_formatter_lookup():
     Assert that there is a formatter function for each declared format type.
     '''
     for k in formatters:
-        assert formatters[k] == getattr(metadata_formatter, f'{k}_formatter')
+        assert formatters[k] == getattr(formatter, f'{k}_formatter')

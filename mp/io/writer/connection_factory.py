@@ -6,7 +6,7 @@ import psycopg2
 import duckdb
 
 from mp.io.writer import DUCKDB, POSTGRESQL
-from mp.io.writer.sql import create
+from mp.io.writer.metadata_sql import create as create_metadata_table
 
 
 class ConnectionFactory:
@@ -30,7 +30,7 @@ class ConnectionFactory:
 class DuckdbConnectionFactory(ConnectionFactory):
     def connect(self):
         dbname = self.dbinfo.get('dbname')
-        if dbname and '/' in dbname:
+        if dbname and '/' in dbname:  # pragma: no cover
             data_path = Path(dbname).parent
             info(f'Creating parent folders for db file: {data_path}')
             makedirs(data_path, exist_ok=True)
@@ -39,7 +39,7 @@ class DuckdbConnectionFactory(ConnectionFactory):
 
         debug('Creating table if it does not exist')
         c = self.connection.cursor()
-        c.execute(create(DUCKDB))
+        c.execute(create_metadata_table())
 
         return self.connection
 

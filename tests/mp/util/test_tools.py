@@ -1,5 +1,5 @@
 import pytest
-from assertpy import assert_that
+from assertpy import assert_that, fail
 
 from mp.util.tools import DatabaseUrlType
 
@@ -10,8 +10,6 @@ duckdb_testdata = [
     ('duckdb:////foo/bar', '/foo/bar'),
     ('duckdb::memory:', ':memory:'),
 ]
-
-
 @pytest.mark.parametrize('input,expected', duckdb_testdata)
 def test_parse_duckdb_url(input, expected):
     under_test = DatabaseUrlType()
@@ -75,10 +73,22 @@ postgres_testdata = [
         },
     ),
 ]
-
-
 @pytest.mark.parametrize('input, expected', postgres_testdata)
 def test_parse_postgres_url(input, expected):
     under_test = DatabaseUrlType()
     actual = under_test.convert(input, None, None)
     assert_that(expected).is_equal_to(actual)
+
+
+failure_cases = [
+    ('foobar', 'URL scheme is required'),
+    ('foobar:', 'URL path is required'),
+]
+@pytest.mark.parametrize('input, expected', failure_cases)
+def test_failure_cases(input, expected):
+    under_test = DatabaseUrlType()
+    try:
+        under_test.convert(input, None, None)
+        fail('Should have thrown exception')
+    except Exception as e:
+        assert_that(str(e)).contains(expected)

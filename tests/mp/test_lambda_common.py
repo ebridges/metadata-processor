@@ -1,5 +1,7 @@
 from copy import deepcopy
+from sys import exc_info
 
+from unittest.mock import patch
 from pytest import raises
 
 from mp.model.image_key import ImageKey
@@ -7,6 +9,7 @@ from mp.lambda_common import (
     extract_image_keys_from_s3_event,
     extract_image_key_from_apig_event,
     check_force_update,
+    write_exception_event,
 )
 
 from tests.mp import (
@@ -15,6 +18,7 @@ from tests.mp import (
     s3_put_single_event_sample,
     apig_event_sample,
 )
+from tests.mp.io.writer.mock_exception_writer import MockDatabaseExceptionEventWriter
 
 
 def test_check_force_update_true():
@@ -38,6 +42,10 @@ def test_check_force_update_malformed():
     assert check_force_update(mock_event) == False
 
 
+def test_check_force_update_none():
+    assert check_force_update(None) is None
+
+
 def test_extract_image_key_from_apig_event():
     expected_key = mock_event_keys[0]
     actual_key = extract_image_key_from_apig_event(apig_event_sample)
@@ -56,6 +64,11 @@ def test_extract_image_key_from_empty_event():
 
 def test_extract_image_key_from_none_path():
     actual_key = extract_image_key_from_apig_event(None)
+    assert actual_key is None
+
+
+def test_extract_image_key_from_malformed_path():
+    actual_key = extract_image_key_from_apig_event({'path': 'abc/def/ghi'})
     assert actual_key is None
 
 
@@ -101,3 +114,17 @@ def test_none_s3_event():
     result = extract_image_keys_from_s3_event(None)
     assert result is not None
     assert len(result) == 0
+
+
+def test_write_exception_event_normal_case():
+    mock_owner_id = 'f543d3d4-fce9-11ea-a54e-73e9095439c2'
+    mock_image_id = 'ea38d6b0-fce9-11ea-b2da-6f3405d59931'
+    image_key = ImageKey(f'{mock_owner_id}/{mock_image_id}.jpg')
+    mock_writer = MockDatabaseExceptionEventWriter(insert_retval=mock_image_id)
+    mock_exception = ValueError('aaa', 'bbb', 'ccc')
+    try:
+        raise mock_exception
+    except ValueError:
+        actual_image_id = write_exception_event(mock_writer, image_key, exc_info())
+    assert actual_image_id == mock_image_id
+    assert mock_writer.insert_count == 1

@@ -1,7 +1,9 @@
 from json import dumps
-from logging import debug, info, warning
+from logging import debug, info, warning, error
 from os import environ
 from tempfile import NamedTemporaryFile
+from traceback import format_tb
+from uuid import uuid4
 
 import sentry_sdk
 from sentry_sdk.integrations.aws_lambda import AwsLambdaIntegration
@@ -16,10 +18,14 @@ from mp import (
 from mp.model.image_key import ImageKey
 from mp.io.loader.s3_loader import download_file_from_s3
 from mp.io.metadata_reader import extract_metadata
+from mp.io.writer.connection_factory import ConnectionFactory
 from mp.io.writer.metadata_writer import (
     MetadataWriter,
     DatabaseMetadataWriter,
-    ConnectionFactory,
+)
+from mp.io.writer.exception_writer import (
+    ExceptionEventWriter,
+    DatabaseExceptionEventWriter,
 )
 from mp.util.tools import parse_db_url
 
@@ -47,7 +53,7 @@ def extract_image_keys_from_s3_event(event: object) -> [ImageKey]:
 
 def check_force_update(event: object) -> bool:
     debug('check_force_update called')
-    if FORCE_UPDATE in environ:
+    if FORCE_UPDATE in environ:  # pragma: no cover
         return True
     if not event:
         return None
@@ -76,11 +82,21 @@ def init_monitoring() -> None:  # pragma: no cover
     info(f'Monitoring configured with DSN: {dsn}')
 
 
-def init_writer() -> MetadataWriter:  # pragma: no cover
-    debug('init_writer called')
+def connection_factory():  # pragma: no cover
     u = environ.get(DATABASE_URL)
     url = parse_db_url(u)
-    conn_factory = ConnectionFactory.instance(url)
+    return ConnectionFactory.instance(url)
+
+
+def init_exception_writer() -> ExceptionEventWriter:  # pragma: no cover
+    debug('init_exception_writer called')
+    conn_factory = connection_factory()
+    return DatabaseExceptionEventWriter(conn_factory)
+
+
+def init_metadata_writer() -> MetadataWriter:  # pragma: no cover
+    debug('init_metadata_writer called')
+    conn_factory = connection_factory()
     return DatabaseMetadataWriter(conn_factory)
 
 
@@ -103,3 +119,20 @@ def generate_json_response(message, sc=200):
         'headers': {'content-type': 'text/json'},
         'body': dumps(mesg),
     }
+
+
+def write_exception_event(writer, image_key, exception):
+    exc = exception[0]
+    type_name = exc.__name__
+    error(f'Received exception when processing {image_key}: {type_name}')
+    tb = '\n'.join(format_tb(exception[2]))
+    event = {
+        'id': uuid4(),
+        'owner': image_key.owner_id,
+        'file_path': image_key.file_path,
+        'error_code': type_name,
+        'message': ' '.join(exception[1].args),
+        'reason': tb,
+        'original_file_path': None,
+    }
+    return writer.write(event)
