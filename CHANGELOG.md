@@ -1,3 +1,32 @@
+## v1.3.0 (2020-09-28)
+
+### Fix
+
+- should be a dict, not a set
+- update how exceptions are translated to events
+- switch to homegrown mocker for writer, as built in one would not work as a context manager
+- inverted logic when mocking env
+- address merge issues from conversion to duckdb
+- tests/logic broken by previous refactor
+
+### Refactor
+
+- add support for side effects
+- alias create function to make it clearer what its doing
+- identify sql as specific to metadata table
+- move db types to a common location
+- scope initialization of metadata writer, in order to provide for another writer to be added.
+- identify sql as specific to metadata table
+- move db types to a common location
+- extend formatters to operate on a plain dict to make them more generic
+
+### Feat
+
+- eliminate duplication of sql for sqlite.
+- serve up duckdb connections as replacement for sqlite connections
+- introduce hook to log unhandled exceptions.
+- introduce capability to log exceptions to processing as events that can be later queried.
+
 ## v1.2.0 (2020-09-21)
 
 ### Feat
